@@ -15,6 +15,10 @@ class ParentShell extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Image.asset('assets/icon/app_icon.png'),
+        ),
         title: Text(t ? 'অভিভাবক ড্যাশবোর্ড' : 'Parental Dashboard'),
         actions: [
           IconButton(

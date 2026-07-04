@@ -28,7 +28,7 @@ class SplashScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('🛡️', style: TextStyle(fontSize: 88)),
+                Image.asset('assets/icon/app_icon.png', width: 140, height: 140),
                 const SizedBox(height: 16),
                 const Text(
                   'SafeZone Ultra',
