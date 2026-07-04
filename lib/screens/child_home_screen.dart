@@ -79,9 +79,70 @@ class ChildHomeScreen extends StatelessWidget {
                     ),
                 ],
               ),
+              const SizedBox(height: 24),
+              InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () => _showQuizOptions(context, t),
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            t ? 'কুইজ 🧩' : 'Quiz 🧩',
+                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        const Icon(Icons.chevron_right),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  void _showQuizOptions(BuildContext context, bool t) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                t ? 'একটি কুইজ বেছে নিন' : 'Choose a Quiz',
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              for (final module in MockData.modules)
+                if (MockData.quizzesByModule.containsKey(module.id))
+                  ListTile(
+                    leading: Text(_emojiFor(module.category), style: const TextStyle(fontSize: 24)),
+                    title: Text(t ? module.titleBn : module.title, style: const TextStyle(fontWeight: FontWeight.w600)),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      Navigator.pop(sheetContext);
+                      Navigator.pushNamed(
+                        context,
+                        '/quiz',
+                        arguments: MockData.quizzesByModule[module.id],
+                      );
+                    },
+                  ),
+            ],
+          ),
+        ),
       ),
     );
   }
