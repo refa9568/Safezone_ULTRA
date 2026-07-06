@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider/provider.dart';
 import '../data/mock_data.dart';
 import '../models/models.dart';
@@ -36,12 +37,39 @@ class LessonPlayerScreen extends StatefulWidget {
 
 class _LessonPlayerScreenState extends State<LessonPlayerScreen> {
   final PageController _pageController = PageController();
+  final FlutterTts _tts = FlutterTts();
   int _page = 0;
+  bool _isSpeaking = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _tts.setSpeechRate(0.42);
+    _tts.setPitch(1.05);
+    _tts.setCompletionHandler(() {
+      if (mounted) setState(() => _isSpeaking = false);
+    });
+    _tts.setCancelHandler(() {
+      if (mounted) setState(() => _isSpeaking = false);
+    });
+  }
 
   @override
   void dispose() {
+    _tts.stop();
     _pageController.dispose();
     super.dispose();
+  }
+
+  Future<void> _speak(String text, bool bengali) async {
+    if (_isSpeaking) {
+      await _tts.stop();
+      setState(() => _isSpeaking = false);
+      return;
+    }
+    await _tts.setLanguage(bengali ? 'bn-BD' : 'en-US');
+    setState(() => _isSpeaking = true);
+    await _tts.speak(text);
   }
 
   @override
@@ -80,7 +108,13 @@ class _LessonPlayerScreenState extends State<LessonPlayerScreen> {
                   child: PageView.builder(
                     controller: _pageController,
                     itemCount: steps.length,
-                    onPageChanged: (i) => setState(() => _page = i),
+                    onPageChanged: (i) {
+                      _tts.stop();
+                      setState(() {
+                        _page = i;
+                        _isSpeaking = false;
+                      });
+                    },
                     itemBuilder: (context, i) {
                       final icon = i < module.stepIcons.length ? module.stepIcons[i] : _emoji(module.category);
                       return Padding(
@@ -93,12 +127,27 @@ class _LessonPlayerScreenState extends State<LessonPlayerScreen> {
                               emoji: icon,
                               skyColors: _skyColors[module.category]!,
                               groundColor: _groundColors[module.category]!,
+                              seed: i,
                             ),
                             const SizedBox(height: 24),
                             Text(
                               steps[i],
                               textAlign: TextAlign.center,
                               style: const TextStyle(fontSize: 19, height: 1.5, fontWeight: FontWeight.w600),
+                            ),
+                            const SizedBox(height: 14),
+                            ElevatedButton.icon(
+                              onPressed: () => _speak(steps[i], t),
+                              icon: Icon(_isSpeaking ? Icons.stop_circle_rounded : Icons.volume_up_rounded),
+                              label: Text(
+                                _isSpeaking
+                                    ? (t ? 'থামাও' : 'Stop')
+                                    : (t ? '🔊 শুনুন' : '🔊 Listen'),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                shape: const StadiumBorder(),
+                                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+                              ),
                             ),
                           ],
                         ),
@@ -169,6 +218,22 @@ class _LessonPlayerScreenState extends State<LessonPlayerScreen> {
                   Text(
                     t ? module.summaryBn : module.summary,
                     style: const TextStyle(fontSize: 16, height: 1.5),
+                  ),
+                  const SizedBox(height: 14),
+                  Center(
+                    child: ElevatedButton.icon(
+                      onPressed: () => _speak(t ? module.summaryBn : module.summary, t),
+                      icon: Icon(_isSpeaking ? Icons.stop_circle_rounded : Icons.volume_up_rounded),
+                      label: Text(
+                        _isSpeaking
+                            ? (t ? 'থামাও' : 'Stop')
+                            : (t ? '🔊 শুনুন' : '🔊 Listen'),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        shape: const StadiumBorder(),
+                        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+                      ),
+                    ),
                   ),
                   const Spacer(),
                   if (hasQuiz)
