@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider/provider.dart';
-import '../data/mock_data.dart';
-import '../models/models.dart';
-import '../state/app_state.dart';
+import '../../services/mock_data.dart';
+import '../../models/models.dart';
+import '../../logic/app_state.dart';
 import '../widgets/cartoon_instruction_card.dart';
 import '../widgets/floating_bubbles.dart';
 

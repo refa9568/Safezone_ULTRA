@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../data/mock_data.dart';
-import '../state/app_state.dart';
+import '../../services/mock_data.dart';
+import '../../logic/app_state.dart';
 import '../widgets/floating_bubbles.dart';
 
 class BadgeCollectionScreen extends StatelessWidget {

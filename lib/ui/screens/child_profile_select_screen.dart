@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/models.dart';
-import '../state/app_state.dart';
+import '../../models/models.dart';
+import '../../logic/app_state.dart';
 import '../widgets/floating_bubbles.dart';
 
 const List<List<Color>> _kidCardColors = [

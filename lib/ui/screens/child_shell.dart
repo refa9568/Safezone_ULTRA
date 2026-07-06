@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../state/app_state.dart';
+import '../../logic/app_state.dart';
 import 'child_home_screen.dart';
 import 'lesson_list_screen.dart';
 import 'safety_buddy_screen.dart';

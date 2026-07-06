@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/models.dart';
-import '../state/app_state.dart';
+import '../../models/models.dart';
+import '../../logic/app_state.dart';
 import 'notification_center_screen.dart';
 
 class ParentShell extends StatelessWidget {

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../data/mock_data.dart';
-import '../models/models.dart';
-import '../state/app_state.dart';
+import '../../services/mock_data.dart';
+import '../../models/models.dart';
+import '../../logic/app_state.dart';
 import '../theme/app_theme.dart';
 import '../widgets/floating_bubbles.dart';
 
