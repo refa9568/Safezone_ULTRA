@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../state/app_state.dart';
+import '../../logic/app_state.dart';
 import '../widgets/floating_bubbles.dart';
 
 class SafetyBuddyScreen extends StatefulWidget {

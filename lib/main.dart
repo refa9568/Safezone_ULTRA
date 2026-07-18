@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'state/app_state.dart';
-import 'theme/app_theme.dart';
-import 'screens/splash_screen.dart';
-import 'screens/login_screen.dart';
-import 'screens/register_screen.dart';
-import 'screens/child_profile_select_screen.dart';
-import 'screens/child_shell.dart';
-import 'screens/lesson_list_screen.dart';
-import 'screens/lesson_player_screen.dart';
-import 'screens/quiz_screen.dart';
-import 'screens/quiz_result_screen.dart';
-import 'screens/parent_shell.dart';
-import 'screens/child_progress_detail_screen.dart';
-import 'screens/screen_time_settings_screen.dart';
-import 'screens/settings_screen.dart';
-import 'screens/offline_content_screen.dart';
+import 'logic/app_state.dart';
+import 'ui/theme/app_theme.dart';
+import 'ui/screens/splash_screen.dart';
+import 'ui/screens/login_screen.dart';
+import 'ui/screens/register_screen.dart';
+import 'ui/screens/child_profile_select_screen.dart';
+import 'ui/screens/child_shell.dart';
+import 'ui/screens/lesson_list_screen.dart';
+import 'ui/screens/lesson_player_screen.dart';
+import 'ui/screens/quiz_screen.dart';
+import 'ui/screens/quiz_result_screen.dart';
+import 'ui/screens/parent_shell.dart';
+import 'ui/screens/child_progress_detail_screen.dart';
+import 'ui/screens/screen_time_settings_screen.dart';
+import 'ui/screens/settings_screen.dart';
+import 'ui/screens/offline_content_screen.dart';
 
 void main() {
   runApp(const SafeZoneUltraApp());

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../data/mock_data.dart';
+import '../services/mock_data.dart';
 import '../models/models.dart';
 
 class AppState extends ChangeNotifier {
