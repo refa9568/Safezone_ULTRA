@@ -1,16 +1,20 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'safety_mascot.dart';
 
 class CartoonInstructionCard extends StatefulWidget {
   final String emoji;
   final List<Color> skyColors;
   final Color groundColor;
+  final int seed;
 
   const CartoonInstructionCard({
     super.key,
     required this.emoji,
     required this.skyColors,
     required this.groundColor,
+    this.seed = 0,
   });
 
   @override
@@ -23,8 +27,12 @@ class _CartoonInstructionCardState extends State<CartoonInstructionCard>
   late final Animation<double> _bounce;
   late final AnimationController _idleController;
   late final AnimationController _driftController;
+  late final AnimationController _cloud1Squash;
+  late final AnimationController _cloud2Squash;
+  late final AnimationController _groundBounce;
 
   final List<_Burst> _bursts = [];
+  final List<_CloudPoke> _cloudPokes = [];
 
   @override
   void initState() {
@@ -38,6 +46,9 @@ class _CartoonInstructionCardState extends State<CartoonInstructionCard>
 
     _idleController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400))..repeat(reverse: true);
     _driftController = AnimationController(vsync: this, duration: const Duration(seconds: 6))..repeat();
+    _cloud1Squash = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
+    _cloud2Squash = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
+    _groundBounce = AnimationController(vsync: this, duration: const Duration(milliseconds: 350));
   }
 
   @override
@@ -45,10 +56,14 @@ class _CartoonInstructionCardState extends State<CartoonInstructionCard>
     _bounceController.dispose();
     _idleController.dispose();
     _driftController.dispose();
+    _cloud1Squash.dispose();
+    _cloud2Squash.dispose();
+    _groundBounce.dispose();
     super.dispose();
   }
 
   void _onTap() {
+    HapticFeedback.mediumImpact();
     if (!_bounceController.isAnimating) {
       _bounceController.forward(from: 0);
     }
@@ -58,6 +73,23 @@ class _CartoonInstructionCardState extends State<CartoonInstructionCard>
 
   void _removeBurst(int id) {
     setState(() => _bursts.removeWhere((b) => b.id == id));
+  }
+
+  void _onCloudTap(int cloudIndex) {
+    HapticFeedback.selectionClick();
+    final controller = cloudIndex == 0 ? _cloud1Squash : _cloud2Squash;
+    if (!controller.isAnimating) controller.forward(from: 0);
+    final id = DateTime.now().microsecondsSinceEpoch;
+    setState(() => _cloudPokes.add(_CloudPoke(id, cloudIndex)));
+  }
+
+  void _removeCloudPoke(int id) {
+    setState(() => _cloudPokes.removeWhere((p) => p.id == id));
+  }
+
+  void _onGroundTap() {
+    HapticFeedback.lightImpact();
+    if (!_groundBounce.isAnimating) _groundBounce.forward(from: 0);
   }
 
   @override
@@ -88,21 +120,52 @@ class _CartoonInstructionCardState extends State<CartoonInstructionCard>
                   ),
                 ),
               ),
-              // Drifting clouds
+              // Drifting clouds (tappable)
               AnimatedBuilder(
-                animation: _driftController,
+                animation: Listenable.merge([_driftController, _cloud1Squash]),
                 builder: (context, _) {
                   final dx = sin(_driftController.value * 2 * pi) * 10;
-                  return Positioned(top: 18, left: 20 + dx, child: const _Cloud(size: 46));
+                  final squash = sin(pi * _cloud1Squash.value).clamp(0.0, 1.0);
+                  return Positioned(
+                    top: 18,
+                    left: 20 + dx,
+                    child: GestureDetector(
+                      onTap: () => _onCloudTap(0),
+                      child: Transform.scale(
+                        scaleX: 1 + squash * 0.25,
+                        scaleY: 1 - squash * 0.25,
+                        child: const _Cloud(size: 46),
+                      ),
+                    ),
+                  );
                 },
               ),
               AnimatedBuilder(
-                animation: _driftController,
+                animation: Listenable.merge([_driftController, _cloud2Squash]),
                 builder: (context, _) {
                   final dx = sin(_driftController.value * 2 * pi + pi) * 8;
-                  return Positioned(top: 34, right: 24 - dx, child: const _Cloud(size: 34));
+                  final squash = sin(pi * _cloud2Squash.value).clamp(0.0, 1.0);
+                  return Positioned(
+                    top: 34,
+                    right: 24 - dx,
+                    child: GestureDetector(
+                      onTap: () => _onCloudTap(1),
+                      child: Transform.scale(
+                        scaleX: 1 + squash * 0.25,
+                        scaleY: 1 - squash * 0.25,
+                        child: const _Cloud(size: 34),
+                      ),
+                    ),
+                  );
                 },
               ),
+              for (final poke in _cloudPokes)
+                Positioned(
+                  top: poke.cloudIndex == 0 ? 30 : 46,
+                  left: poke.cloudIndex == 0 ? 44 : null,
+                  right: poke.cloudIndex == 0 ? null : 42,
+                  child: _ParticleBurst(key: ValueKey(poke.id), onDone: () => _removeCloudPoke(poke.id)),
+                ),
               // Twinkling sparkle
               AnimatedBuilder(
                 animation: _idleController,
@@ -126,14 +189,28 @@ class _CartoonInstructionCardState extends State<CartoonInstructionCard>
                   ),
                 ),
               ),
-              // Ground
+              // Ground (tappable bounce)
               Align(
                 alignment: Alignment.bottomCenter,
-                child: Container(
-                  height: 54,
-                  decoration: BoxDecoration(
-                    color: widget.groundColor,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+                child: GestureDetector(
+                  onTap: _onGroundTap,
+                  child: AnimatedBuilder(
+                    animation: _groundBounce,
+                    builder: (context, child) {
+                      final squash = sin(pi * _groundBounce.value).clamp(0.0, 1.0);
+                      return Transform.scale(
+                        scaleY: 1 - squash * 0.12,
+                        alignment: Alignment.bottomCenter,
+                        child: child,
+                      );
+                    },
+                    child: Container(
+                      height: 54,
+                      decoration: BoxDecoration(
+                        color: widget.groundColor,
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -153,24 +230,10 @@ class _CartoonInstructionCardState extends State<CartoonInstructionCard>
                         child: Transform.rotate(angle: _bounce.value, child: child),
                       );
                     },
-                    child: Container(
-                      width: 132,
-                      height: 132,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.18),
-                            blurRadius: 12,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
-                        border: Border.all(color: Colors.white, width: 6),
-                      ),
-                      child: Center(
-                        child: Text(widget.emoji, style: const TextStyle(fontSize: 68)),
-                      ),
+                    child: SafetyMascot(
+                      bodyColor: mascotColorFrom(widget.groundColor),
+                      emoji: widget.emoji,
+                      seed: widget.seed,
                     ),
                   ),
                 ),
@@ -192,6 +255,12 @@ class _CartoonInstructionCardState extends State<CartoonInstructionCard>
 class _Burst {
   final int id;
   _Burst(this.id);
+}
+
+class _CloudPoke {
+  final int id;
+  final int cloudIndex;
+  _CloudPoke(this.id, this.cloudIndex);
 }
 
 class _ParticleBurst extends StatefulWidget {
