@@ -62,7 +62,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
-                  onPressed: () => Navigator.pushReplacementNamed(context, '/profiles'),
+                  onPressed: () {
+                    state.signInParent();
+                    Navigator.pushReplacementNamed(context, '/profiles');
+                  },
                   child: Text(t ? 'লগইন' : 'Login'),
                 ),
                 const SizedBox(height: 12),

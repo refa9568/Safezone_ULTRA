@@ -117,7 +117,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
-                  onPressed: () => Navigator.pushReplacementNamed(context, '/profiles'),
+                  onPressed: () {
+                    final name = _nameController.text.trim();
+                    final age = int.tryParse(_ageController.text.trim());
+
+                    if (name.isEmpty || age == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(t ? 'নাম এবং বয়স সঠিকভাবে লিখুন' : 'Enter a valid name and age'),
+                        ),
+                      );
+                      return;
+                    }
+
+                    state.addChildProfile(name: name, age: age, sex: _sex);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          t ? '$name প্রোফাইল তৈরি হয়েছে' : '$name profile created',
+                        ),
+                      ),
+                    );
+                    Navigator.pushReplacementNamed(context, '/profiles');
+                  },
                   child: Text(t ? 'নিবন্ধন করুন' : 'Register'),
                 ),
                 const SizedBox(height: 12),

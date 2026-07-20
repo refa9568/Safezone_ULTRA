@@ -25,6 +25,40 @@ class AppState extends ChangeNotifier {
   final List<ChatMessage> chatMessages = [];
   final List<AppNotification> notifications = [];
 
+  String avatarForSex(String sex) {
+    switch (sex.toLowerCase()) {
+      case 'male':
+        return '🦁';
+      case 'other':
+        return '🌟';
+      default:
+        return '🦊';
+    }
+  }
+
+  Child addChildProfile({
+    required String name,
+    required int age,
+    required String sex,
+  }) {
+    final child = Child(
+      id: 'c${children.length + 1}',
+      parentId: parent.id,
+      name: name,
+      age: age,
+      avatarEmoji: avatarForSex(sex),
+    );
+    children.add(child);
+    notifyListeners();
+    return child;
+  }
+
+  void signInParent() {
+    parentMode = true;
+    activeChild = null;
+    notifyListeners();
+  }
+
   void toggleLanguage() {
     bengali = !bengali;
     notifyListeners();

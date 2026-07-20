@@ -117,11 +117,11 @@ class _LessonPlayerScreenState extends State<LessonPlayerScreen> {
                     },
                     itemBuilder: (context, i) {
                       final icon = i < module.stepIcons.length ? module.stepIcons[i] : _emoji(module.category);
-                      return Padding(
+                      return SingleChildScrollView(
                         key: ValueKey('step-$i'),
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             CartoonInstructionCard(
                               emoji: icon,
