@@ -16,6 +16,7 @@ import 'ui/screens/child_progress_detail_screen.dart';
 import 'ui/screens/screen_time_settings_screen.dart';
 import 'ui/screens/settings_screen.dart';
 import 'ui/screens/offline_content_screen.dart';
+import 'ui/screens/mind_game_screen.dart';
 
 void main() {
   runApp(const SafeZoneUltraApp());
@@ -48,6 +49,7 @@ class SafeZoneUltraApp extends StatelessWidget {
           '/screen-time': (_) => const ScreenTimeSettingsScreen(),
           '/settings': (_) => const SettingsScreen(),
           '/offline': (_) => const OfflineContentScreen(),
+          '/mind-game': (_) => const MindGameScreen(),
         },
       ),
     );

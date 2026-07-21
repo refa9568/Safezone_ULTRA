@@ -10,6 +10,7 @@ class AppState extends ChangeNotifier {
     name: 'Rahim Uddin',
     email: 'parent@example.com',
     screenTimeLimitMinutes: 45,
+    emergencyPhone: '+8801700000000',
   );
 
   final List<Child> children = [
@@ -119,6 +120,18 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setEmergencyPhone(String phone) {
+    parent.emergencyPhone = phone;
+    notifyListeners();
+  }
+
+  bool verifyParentPin(String pin) => pin == parent.parentPin;
+
+  void setParentPin(String pin) {
+    parent.parentPin = pin;
+    notifyListeners();
+  }
+
   List<QuizResult> resultsForChild(String childId) =>
       quizResults.where((r) => r.childId == childId).toList();
 
@@ -158,6 +171,25 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool completeMindGame(Child child) {
+    final alreadyEarned = badges.any(
+      (b) => b.childId == child.id && b.name == 'Memory Master',
+    );
+    if (!alreadyEarned) {
+      badges.add(
+        EarnedBadge(
+          id: 'b${badges.length + 1}',
+          childId: child.id,
+          name: 'Memory Master',
+          emoji: '🧠',
+          earnedAt: DateTime.now(),
+        ),
+      );
+      notifyListeners();
+    }
+    return !alreadyEarned;
+  }
+
   void askBuddy(Child child, String prompt) {
     final reply = MockData.chatbotReply(prompt);
     chatMessages.add(
@@ -177,6 +209,20 @@ class AppState extends ChangeNotifier {
         prompt: prompt,
         response: reply,
         createdAt: DateTime.now(),
+      ),
+    );
+    notifyListeners();
+  }
+
+  void triggerSos(Child child) {
+    notifications.insert(
+      0,
+      AppNotification(
+        id: 'n${notifications.length + 1}',
+        parentId: parent.id,
+        childId: child.id,
+        message: '🆘 SOS! ${child.name} needs help right now!',
+        sentAt: DateTime.now(),
       ),
     );
     notifyListeners();

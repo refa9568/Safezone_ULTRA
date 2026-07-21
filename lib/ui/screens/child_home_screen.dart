@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../services/mock_data.dart';
 import '../../models/models.dart';
 import '../../logic/app_state.dart';
@@ -27,7 +28,18 @@ class ChildHomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('${t ? 'হ্যালো' : 'Hi'}, ${child.name} ${child.avatarEmoji}'),
+        title: Row(
+          children: [
+            Flexible(
+              child: Text(
+                '${t ? 'হ্যালো' : 'Hi'}, ${child.name} ${child.avatarEmoji}',
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 10),
+            _SosBar(onTap: () => _handleSos(context, state, child, t), compact: true),
+          ],
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.language),
@@ -80,6 +92,27 @@ class ChildHomeScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 24),
+              InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () => Navigator.pushNamed(context, '/mind-game'),
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            t ? 'মেমরি গেম 🧠' : 'Mind Game 🧠',
+                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        const Icon(Icons.chevron_right),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
               InkWell(
                 borderRadius: BorderRadius.circular(16),
                 onTap: () => _showQuizOptions(context, t),
@@ -147,6 +180,48 @@ class ChildHomeScreen extends StatelessWidget {
     );
   }
 
+  Future<void> _handleSos(BuildContext context, AppState state, Child child, bool t) async {
+    state.triggerSos(child);
+    final phone = state.parent.emergencyPhone;
+    if (phone.isEmpty) {
+      showDialog(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('🆘', style: TextStyle(fontSize: 56)),
+              const SizedBox(height: 12),
+              Text(
+                t ? 'তোমার অভিভাবককে জানানো হয়েছে!' : 'Your parent has been alerted!',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                t
+                    ? 'কোনো জরুরি নম্বর সেট করা নেই।'
+                    : 'No emergency number has been set yet.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.grey),
+              ),
+            ],
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            ElevatedButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(t ? 'ঠিক আছে' : 'OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+    await launchUrl(Uri(scheme: 'tel', path: phone));
+  }
+
   String _emojiFor(HazardCategory category) {
     switch (category) {
       case HazardCategory.fire:
@@ -158,6 +233,88 @@ class ChildHomeScreen extends StatelessWidget {
       case HazardCategory.stranger:
         return '🚸';
     }
+  }
+}
+
+class _SosBar extends StatefulWidget {
+  final VoidCallback onTap;
+  final bool compact;
+
+  const _SosBar({required this.onTap, this.compact = false});
+
+  @override
+  State<_SosBar> createState() => _SosBarState();
+}
+
+class _SosBarState extends State<_SosBar> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _pulse;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    )..repeat(reverse: true);
+    _pulse = Tween<double>(begin: 1.0, end: 1.08).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final horizontalPadding = widget.compact ? 12.0 : 20.0;
+    final verticalPadding = widget.compact ? 6.0 : 12.0;
+    final emojiSize = widget.compact ? 14.0 : 20.0;
+    final fontSize = widget.compact ? 13.0 : 18.0;
+
+    return ScaleTransition(
+      scale: _pulse,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(30),
+          onTap: widget.onTap,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: verticalPadding),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE53935),
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFE53935).withValues(alpha: 0.5),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('🆘', style: TextStyle(fontSize: emojiSize)),
+                const SizedBox(width: 6),
+                Text(
+                  'SOS',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    fontSize: fontSize,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

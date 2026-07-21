@@ -20,12 +20,16 @@ class Parent {
   final String name;
   final String email;
   int screenTimeLimitMinutes;
+  String emergencyPhone;
+  String parentPin;
 
   Parent({
     required this.id,
     required this.name,
     required this.email,
     this.screenTimeLimitMinutes = 60,
+    this.emergencyPhone = '',
+    this.parentPin = '1234',
   });
 }
 

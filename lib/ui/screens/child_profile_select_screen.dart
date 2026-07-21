@@ -14,6 +14,60 @@ const List<List<Color>> _kidCardColors = [
 class ChildProfileSelectScreen extends StatelessWidget {
   const ChildProfileSelectScreen({super.key});
 
+  Future<void> _requestParentAccess(BuildContext context, AppState state, bool t) async {
+    final controller = TextEditingController();
+    String? errorText;
+
+    final unlocked = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text(t ? 'অভিভাবক পিন দিন' : 'Enter Parent PIN'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            obscureText: true,
+            keyboardType: TextInputType.number,
+            maxLength: 6,
+            decoration: InputDecoration(
+              labelText: t ? 'পিন' : 'PIN',
+              errorText: errorText,
+            ),
+            onSubmitted: (_) {
+              if (state.verifyParentPin(controller.text.trim())) {
+                Navigator.pop(dialogContext, true);
+              } else {
+                setDialogState(() => errorText = t ? 'ভুল পিন' : 'Incorrect PIN');
+              }
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(t ? 'বাতিল' : 'Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (state.verifyParentPin(controller.text.trim())) {
+                  Navigator.pop(dialogContext, true);
+                } else {
+                  setDialogState(() => errorText = t ? 'ভুল পিন' : 'Incorrect PIN');
+                }
+              },
+              child: Text(t ? 'প্রবেশ করুন' : 'Enter'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (unlocked == true && context.mounted) {
+      state.enterParentMode();
+      Navigator.pushReplacementNamed(context, '/parent');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
@@ -47,10 +101,7 @@ class ChildProfileSelectScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 OutlinedButton.icon(
-                  onPressed: () {
-                    state.enterParentMode();
-                    Navigator.pushReplacementNamed(context, '/parent');
-                  },
+                  onPressed: () => _requestParentAccess(context, state, t),
                   icon: const Icon(Icons.admin_panel_settings),
                   label: Text(t ? 'অভিভাবক ড্যাশবোর্ড' : 'Parent Dashboard'),
                 ),

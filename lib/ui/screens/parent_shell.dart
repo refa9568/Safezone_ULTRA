@@ -15,12 +15,16 @@ class ParentShell extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        leading: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Image.asset('assets/icon/app_icon.png'),
-        ),
         title: Text(t ? 'অভিভাবক ড্যাশবোর্ড' : 'Parental Dashboard'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.home_rounded),
+            tooltip: t ? 'শিশুদের স্ক্রিনে ফিরে যান' : 'Back to Kids Screen',
+            onPressed: () {
+              state.parentMode = false;
+              Navigator.pushReplacementNamed(context, '/profiles');
+            },
+          ),
           IconButton(
             icon: Badge(
               label: Text('$unread'),
@@ -50,6 +54,15 @@ class ParentShell extends StatelessWidget {
                   ],
                 ),
               ),
+              ListTile(
+                leading: const Icon(Icons.home_rounded),
+                title: Text(t ? 'শিশুদের স্ক্রিনে ফিরে যান' : 'Back to Kids Screen'),
+                onTap: () {
+                  state.parentMode = false;
+                  Navigator.pushReplacementNamed(context, '/profiles');
+                },
+              ),
+              const Divider(),
               ListTile(
                 leading: const Icon(Icons.timer_outlined),
                 title: Text(t ? 'স্ক্রিন টাইম সেটিংস' : 'Screen Time Settings'),
