@@ -50,7 +50,10 @@ class _ChildShellState extends State<ChildShell> {
     final t = state.bengali;
     final pages = [
       const ChildHomeScreen(),
-      const LessonListScreen(embedded: true),
+      LessonListScreen(
+        embedded: true,
+        onBack: () => Navigator.pushReplacementNamed(context, '/profiles'),
+      ),
       const SafetyBuddyScreen(),
       const BadgeCollectionScreen(),
     ];

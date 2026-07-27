@@ -5,6 +5,7 @@ import 'package:video_player/video_player.dart';
 import '../../services/mock_data.dart';
 import '../../models/models.dart';
 import '../../logic/app_state.dart';
+import '../theme/app_theme.dart';
 import '../widgets/cartoon_instruction_card.dart';
 import '../widgets/floating_bubbles.dart';
 
@@ -28,6 +29,10 @@ const Map<HazardCategory, List<String>> _pageBubbles = {
   HazardCategory.earthquake: ['🌍', '📦', '🏠', '⭐', '✨', '🪨'],
   HazardCategory.stranger: ['🚸', '🎈', '⭐', '🧸', '✨', '🛡️'],
 };
+
+/// Lightens a color toward white so it reads as a soft page backdrop
+/// rather than a saturated block of color.
+Color _soften(Color c) => Color.lerp(c, Colors.white, 0.55)!;
 
 class LessonPlayerScreen extends StatefulWidget {
   const LessonPlayerScreen({super.key});
@@ -82,59 +87,101 @@ class _LessonPlayerScreenState extends State<LessonPlayerScreen> {
     final steps = t ? module.stepsBn : module.steps;
     final hasSteps = steps.isNotEmpty;
 
+    final pageBackground = _skyColors[module.category]!
+        .map<Color>(_soften)
+        .toList();
+
     return Scaffold(
       appBar: AppBar(
         title: Text(t ? module.titleBn : module.title),
         actions: [
-          IconButton(icon: const Icon(Icons.language), onPressed: state.toggleLanguage),
+          IconButton(
+            icon: const Icon(Icons.language),
+            onPressed: state.toggleLanguage,
+          ),
         ],
       ),
       body: hasSteps
           ? Stack(
               children: [
                 Positioned.fill(
-                  child: FloatingBubbles(count: 10, emojis: _pageBubbles[module.category]!),
-                ),
-                Column(
-              children: [
-                LinearProgressIndicator(value: (_page + 1) / steps.length),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Text(
-                    t ? 'নির্দেশনা ${_page + 1} / ${steps.length}' : 'Instruction ${_page + 1} of ${steps.length}',
-                    style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.grey),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: pageBackground,
+                      ),
+                    ),
                   ),
                 ),
-                Expanded(
-                  child: PageView.builder(
-                    controller: _pageController,
-                    itemCount: steps.length,
-                    onPageChanged: (i) {
-                      _tts.stop();
-                      setState(() {
-                        _page = i;
-                        _isSpeaking = false;
-                      });
-                    },
-                    itemBuilder: (context, i) {
-                      final icon = i < module.stepIcons.length ? module.stepIcons[i] : _emoji(module.category);
-                      final hasVideo = i < module.stepVideos.length && module.stepVideos[i].isNotEmpty;
-                      final hasImage = !hasVideo && i < module.stepImages.length && module.stepImages[i].isNotEmpty;
-                      return SingleChildScrollView(
-                        key: ValueKey('step-$i'),
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            hasVideo
-                                ? _StepVideo(assetPath: module.stepVideos[i])
-                                : hasImage
+                Positioned.fill(
+                  child: FloatingBubbles(
+                    count: 10,
+                    emojis: _pageBubbles[module.category]!,
+                  ),
+                ),
+                Column(
+                  children: [
+                    LinearProgressIndicator(value: (_page + 1) / steps.length),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: Text(
+                        t
+                            ? 'নির্দেশনা ${_page + 1} / ${steps.length}'
+                            : 'Instruction ${_page + 1} of ${steps.length}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: PageView.builder(
+                        controller: _pageController,
+                        itemCount: steps.length,
+                        onPageChanged: (i) {
+                          _tts.stop();
+                          setState(() {
+                            _page = i;
+                            _isSpeaking = false;
+                          });
+                        },
+                        itemBuilder: (context, i) {
+                          final icon = i < module.stepIcons.length
+                              ? module.stepIcons[i]
+                              : _emoji(module.category);
+                          final hasVideo =
+                              i < module.stepVideos.length &&
+                              module.stepVideos[i].isNotEmpty;
+                          final hasImage =
+                              !hasVideo &&
+                              i < module.stepImages.length &&
+                              module.stepImages[i].isNotEmpty;
+                          return SingleChildScrollView(
+                            key: ValueKey('step-$i'),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 16,
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                hasVideo
+                                    ? _StepVideo(
+                                        assetPath: module.stepVideos[i],
+                                      )
+                                    : hasImage
                                     ? Container(
                                         height: 200,
                                         width: double.infinity,
                                         decoration: BoxDecoration(
-                                          color: Colors.black.withValues(alpha: 0.04),
-                                          borderRadius: BorderRadius.circular(24),
+                                          color: Colors.black.withValues(
+                                            alpha: 0.04,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            24,
+                                          ),
                                         ),
                                         clipBehavior: Clip.antiAlias,
                                         child: Image.asset(
@@ -145,128 +192,197 @@ class _LessonPlayerScreenState extends State<LessonPlayerScreen> {
                                     : CartoonInstructionCard(
                                         emoji: icon,
                                         skyColors: _skyColors[module.category]!,
-                                        groundColor: _groundColors[module.category]!,
+                                        groundColor:
+                                            _groundColors[module.category]!,
                                         seed: i,
                                       ),
-                            const SizedBox(height: 24),
-                            Text(
-                              steps[i],
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(fontSize: 19, height: 1.5, fontWeight: FontWeight.w600),
+                                const SizedBox(height: 24),
+                                Text(
+                                  steps[i],
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 19,
+                                    height: 1.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                const SizedBox(height: 14),
+                                ElevatedButton.icon(
+                                  onPressed: () => _speak(steps[i], t),
+                                  icon: Icon(
+                                    _isSpeaking
+                                        ? Icons.stop_circle_rounded
+                                        : Icons.volume_up_rounded,
+                                  ),
+                                  label: Text(
+                                    _isSpeaking
+                                        ? (t ? 'থামাও' : 'Stop')
+                                        : (t ? '🔊 শুনুন' : '🔊 Listen'),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    shape: const StadiumBorder(),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 22,
+                                      vertical: 12,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 14),
-                            ElevatedButton.icon(
-                              onPressed: () => _speak(steps[i], t),
-                              icon: Icon(_isSpeaking ? Icons.stop_circle_rounded : Icons.volume_up_rounded),
-                              label: Text(
-                                _isSpeaking
-                                    ? (t ? 'থামাও' : 'Stop')
-                                    : (t ? '🔊 শুনুন' : '🔊 Listen'),
+                          );
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: _page == 0
+                                  ? null
+                                  : () => _pageController.previousPage(
+                                      duration: const Duration(
+                                        milliseconds: 250,
+                                      ),
+                                      curve: Curves.easeOut,
+                                    ),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppTheme.secondary,
+                                side: const BorderSide(
+                                  color: AppTheme.secondary,
+                                  width: 2,
+                                ),
                               ),
-                              style: ElevatedButton.styleFrom(
-                                shape: const StadiumBorder(),
-                                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
-                              ),
+                              icon: const Icon(Icons.arrow_back_rounded),
+                              label: Text(t ? 'আগের' : 'Previous'),
                             ),
-                          ],
-                        ),
-                      );
-                    },
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _page == steps.length - 1
+                                ? (hasQuiz
+                                      ? ElevatedButton.icon(
+                                          icon: const Icon(Icons.quiz_rounded),
+                                          label: Text(
+                                            t
+                                                ? 'কুইজ শুরু করুন'
+                                                : 'Take the Quiz',
+                                          ),
+                                          onPressed: () => Navigator.pushNamed(
+                                            context,
+                                            '/quiz',
+                                            arguments: MockData
+                                                .quizzesByModule[module.id],
+                                          ),
+                                        )
+                                      : ElevatedButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context),
+                                          child: Text(t ? 'সম্পন্ন' : 'Done'),
+                                        ))
+                                : ElevatedButton.icon(
+                                    onPressed: () => _pageController.nextPage(
+                                      duration: const Duration(
+                                        milliseconds: 250,
+                                      ),
+                                      curve: Curves.easeOut,
+                                    ),
+                                    icon: const Icon(
+                                      Icons.arrow_forward_rounded,
+                                    ),
+                                    label: Text(t ? 'পরবর্তী' : 'Next'),
+                                  ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            )
+          : Stack(
+              children: [
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: pageBackground,
+                      ),
+                    ),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(20),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: _page == 0
-                              ? null
-                              : () => _pageController.previousPage(
-                                    duration: const Duration(milliseconds: 250),
-                                    curve: Curves.easeOut,
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              CartoonInstructionCard(
+                                emoji: _emoji(module.category),
+                                skyColors: _skyColors[module.category]!,
+                                groundColor: _groundColors[module.category]!,
+                              ),
+                              const SizedBox(height: 20),
+                              Text(
+                                t ? module.summaryBn : module.summary,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  height: 1.5,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+                              Center(
+                                child: ElevatedButton.icon(
+                                  onPressed: () => _speak(
+                                    t ? module.summaryBn : module.summary,
+                                    t,
                                   ),
-                          icon: const Icon(Icons.arrow_back_rounded),
-                          label: Text(t ? 'আগের' : 'Previous'),
+                                  icon: Icon(
+                                    _isSpeaking
+                                        ? Icons.stop_circle_rounded
+                                        : Icons.volume_up_rounded,
+                                  ),
+                                  label: Text(
+                                    _isSpeaking
+                                        ? (t ? 'থামাও' : 'Stop')
+                                        : (t ? '🔊 শুনুন' : '🔊 Listen'),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    shape: const StadiumBorder(),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 22,
+                                      vertical: 12,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _page == steps.length - 1
-                            ? (hasQuiz
-                                ? ElevatedButton.icon(
-                                    icon: const Icon(Icons.quiz_rounded),
-                                    label: Text(t ? 'কুইজ শুরু করুন' : 'Take the Quiz'),
-                                    onPressed: () => Navigator.pushNamed(
-                                      context,
-                                      '/quiz',
-                                      arguments: MockData.quizzesByModule[module.id],
-                                    ),
-                                  )
-                                : ElevatedButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: Text(t ? 'সম্পন্ন' : 'Done'),
-                                  ))
-                            : ElevatedButton.icon(
-                                onPressed: () => _pageController.nextPage(
-                                  duration: const Duration(milliseconds: 250),
-                                  curve: Curves.easeOut,
-                                ),
-                                icon: const Icon(Icons.arrow_forward_rounded),
-                                label: Text(t ? 'পরবর্তী' : 'Next'),
-                              ),
-                      ),
+                      if (hasQuiz)
+                        ElevatedButton.icon(
+                          icon: const Icon(Icons.quiz_rounded),
+                          label: Text(t ? 'কুইজ শুরু করুন' : 'Take the Quiz'),
+                          onPressed: () => Navigator.pushNamed(
+                            context,
+                            '/quiz',
+                            arguments: MockData.quizzesByModule[module.id],
+                          ),
+                        ),
                     ],
                   ),
                 ),
               ],
-                ),
-              ],
-            )
-          : Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  CartoonInstructionCard(
-                    emoji: _emoji(module.category),
-                    skyColors: _skyColors[module.category]!,
-                    groundColor: _groundColors[module.category]!,
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    t ? module.summaryBn : module.summary,
-                    style: const TextStyle(fontSize: 16, height: 1.5),
-                  ),
-                  const SizedBox(height: 14),
-                  Center(
-                    child: ElevatedButton.icon(
-                      onPressed: () => _speak(t ? module.summaryBn : module.summary, t),
-                      icon: Icon(_isSpeaking ? Icons.stop_circle_rounded : Icons.volume_up_rounded),
-                      label: Text(
-                        _isSpeaking
-                            ? (t ? 'থামাও' : 'Stop')
-                            : (t ? '🔊 শুনুন' : '🔊 Listen'),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        shape: const StadiumBorder(),
-                        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  if (hasQuiz)
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.quiz_rounded),
-                      label: Text(t ? 'কুইজ শুরু করুন' : 'Take the Quiz'),
-                      onPressed: () => Navigator.pushNamed(
-                        context,
-                        '/quiz',
-                        arguments: MockData.quizzesByModule[module.id],
-                      ),
-                    ),
-                ],
-              ),
             ),
     );
   }
@@ -356,7 +472,11 @@ class _StepVideoState extends State<_StepVideo> {
                         color: Colors.black.withValues(alpha: 0.4),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 32),
+                      child: const Icon(
+                        Icons.play_arrow_rounded,
+                        color: Colors.white,
+                        size: 32,
+                      ),
                     ),
                   ),
                 ],

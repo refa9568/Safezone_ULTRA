@@ -156,12 +156,21 @@ class _ChildCardState extends State<_ChildCard> {
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(widget.child.avatarEmoji, style: const TextStyle(fontSize: 60)),
               const SizedBox(height: 8),
-              Text(
-                widget.child.name,
-                style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Colors.black87),
+              Flexible(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      widget.child.name,
+                      style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Colors.black87),
+                    ),
+                  ),
+                ),
               ),
               Text('Age ${widget.child.age}', style: const TextStyle(color: Colors.black54)),
             ],

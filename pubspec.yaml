@@ -76,6 +76,8 @@ flutter:
     - assets/icon/app_icon.png
     - assets/lessons/flood/
     - assets/lessons/fire/
+    - assets/lessons/earthquake/
+    - assets/lessons/stranger/
   # - images/a_dot_burr.jpeg
   # - images/a_dot_ham.jpeg
 

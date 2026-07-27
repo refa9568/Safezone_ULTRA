@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/models.dart';
 import '../../logic/app_state.dart';
+import '../theme/app_theme.dart';
 import 'notification_center_screen.dart';
 
 class ParentShell extends StatelessWidget {
@@ -120,7 +121,7 @@ class _ChildProgressCard extends StatelessWidget {
         subtitle: Text(
           '${results.length} ${t ? "টি কুইজ" : "quizzes"} • ${badges.length} ${t ? "ব্যাজ" : "badges"} • $remaining ${t ? "মিনিট বাকি" : "min left"}',
         ),
-        trailing: const Icon(Icons.chevron_right),
+        trailing: const Icon(Icons.chevron_right_rounded, color: AppTheme.secondary, size: 28),
         onTap: () => Navigator.pushNamed(context, '/child-progress', arguments: child),
       ),
     );

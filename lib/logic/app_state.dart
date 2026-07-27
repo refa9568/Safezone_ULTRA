@@ -190,6 +190,25 @@ class AppState extends ChangeNotifier {
     return !alreadyEarned;
   }
 
+  bool completeMazeGame(Child child) {
+    final alreadyEarned = badges.any(
+      (b) => b.childId == child.id && b.name == 'Maze Master',
+    );
+    if (!alreadyEarned) {
+      badges.add(
+        EarnedBadge(
+          id: 'b${badges.length + 1}',
+          childId: child.id,
+          name: 'Maze Master',
+          emoji: '🧩',
+          earnedAt: DateTime.now(),
+        ),
+      );
+      notifyListeners();
+    }
+    return !alreadyEarned;
+  }
+
   void askBuddy(Child child, String prompt) {
     final reply = MockData.chatbotReply(prompt);
     chatMessages.add(

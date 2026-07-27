@@ -22,7 +22,9 @@ class ChildHomeScreen extends StatelessWidget {
     final state = context.watch<AppState>();
     final child = state.activeChild!;
     final t = state.bengali;
-    final stars = state.resultsForChild(child.id).fold<int>(0, (sum, r) => sum + r.stars);
+    final stars = state
+        .resultsForChild(child.id)
+        .fold<int>(0, (sum, r) => sum + r.stars);
     final badgeCount = state.badgesForChild(child.id).length;
     final remaining = state.minutesRemaining(child);
 
@@ -37,7 +39,10 @@ class ChildHomeScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10),
-            _SosBar(onTap: () => _handleSos(context, state, child, t), compact: true),
+            _SosBar(
+              onTap: () => _handleSos(context, state, child, t),
+              compact: true,
+            ),
           ],
         ),
         actions: [
@@ -48,7 +53,8 @@ class ChildHomeScreen extends StatelessWidget {
           ),
           IconButton(
             icon: const Icon(Icons.switch_account),
-            onPressed: () => Navigator.pushReplacementNamed(context, '/profiles'),
+            onPressed: () =>
+                Navigator.pushReplacementNamed(context, '/profiles'),
             tooltip: t ? 'প্রোফাইল পরিবর্তন' : 'Switch profile',
           ),
         ],
@@ -61,17 +67,41 @@ class ChildHomeScreen extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Expanded(child: _StatChip(icon: Icons.star_rounded, label: '$stars', sub: t ? 'তারা' : 'Stars', color: Colors.amber)),
+                  Expanded(
+                    child: _StatChip(
+                      icon: Icons.star_rounded,
+                      label: '$stars',
+                      sub: t ? 'তারা' : 'Stars',
+                      color: Colors.amber,
+                    ),
+                  ),
                   const SizedBox(width: 12),
-                  Expanded(child: _StatChip(icon: Icons.emoji_events_rounded, label: '$badgeCount', sub: t ? 'ব্যাজ' : 'Badges', color: AppTheme.secondary)),
+                  Expanded(
+                    child: _StatChip(
+                      icon: Icons.emoji_events_rounded,
+                      label: '$badgeCount',
+                      sub: t ? 'ব্যাজ' : 'Badges',
+                      color: AppTheme.secondary,
+                    ),
+                  ),
                   const SizedBox(width: 12),
-                  Expanded(child: _StatChip(icon: Icons.timer_rounded, label: '$remaining', sub: t ? 'মিনিট বাকি' : 'Min Left', color: AppTheme.success)),
+                  Expanded(
+                    child: _StatChip(
+                      icon: Icons.timer_rounded,
+                      label: '$remaining',
+                      sub: t ? 'মিনিট বাকি' : 'Min Left',
+                      color: AppTheme.success,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 24),
               Text(
                 t ? 'পাঠ বিভাগসমূহ 🎨' : 'Lesson Categories 🎨',
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 12),
               GridView.count(
@@ -87,7 +117,11 @@ class ChildHomeScreen extends StatelessWidget {
                       emoji: _emojiFor(module.category),
                       title: t ? module.titleBn : module.title,
                       colors: _categoryColors[module.category]!,
-                      onTap: () => Navigator.pushNamed(context, '/lesson-player', arguments: module),
+                      onTap: () => Navigator.pushNamed(
+                        context,
+                        '/lesson-player',
+                        arguments: module,
+                      ),
                     ),
                 ],
               ),
@@ -103,10 +137,45 @@ class ChildHomeScreen extends StatelessWidget {
                         Expanded(
                           child: Text(
                             t ? 'মেমরি গেম 🧠' : 'Mind Game 🧠',
-                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                        const Icon(Icons.chevron_right),
+                        const Icon(
+                          Icons.chevron_right_rounded,
+                          color: AppTheme.secondary,
+                          size: 28,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () => Navigator.pushNamed(context, '/maze-game'),
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            t ? 'গোলকধাঁধা 🗺️' : 'Maze Game 🗺️',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const Icon(
+                          Icons.chevron_right_rounded,
+                          color: AppTheme.secondary,
+                          size: 28,
+                        ),
                       ],
                     ),
                   ),
@@ -124,10 +193,17 @@ class ChildHomeScreen extends StatelessWidget {
                         Expanded(
                           child: Text(
                             t ? 'কুইজ 🧩' : 'Quiz 🧩',
-                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                        const Icon(Icons.chevron_right),
+                        const Icon(
+                          Icons.chevron_right_rounded,
+                          color: AppTheme.secondary,
+                          size: 28,
+                        ),
                       ],
                     ),
                   ),
@@ -155,15 +231,28 @@ class ChildHomeScreen extends StatelessWidget {
             children: [
               Text(
                 t ? 'একটি কুইজ বেছে নিন' : 'Choose a Quiz',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 16),
               for (final module in MockData.modules)
                 if (MockData.quizzesByModule.containsKey(module.id))
                   ListTile(
-                    leading: Text(_emojiFor(module.category), style: const TextStyle(fontSize: 24)),
-                    title: Text(t ? module.titleBn : module.title, style: const TextStyle(fontWeight: FontWeight.w600)),
-                    trailing: const Icon(Icons.chevron_right),
+                    leading: Text(
+                      _emojiFor(module.category),
+                      style: const TextStyle(fontSize: 24),
+                    ),
+                    title: Text(
+                      t ? module.titleBn : module.title,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    trailing: const Icon(
+                      Icons.chevron_right_rounded,
+                      color: AppTheme.secondary,
+                      size: 28,
+                    ),
                     onTap: () {
                       Navigator.pop(sheetContext);
                       Navigator.pushNamed(
@@ -180,23 +269,35 @@ class ChildHomeScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _handleSos(BuildContext context, AppState state, Child child, bool t) async {
+  Future<void> _handleSos(
+    BuildContext context,
+    AppState state,
+    Child child,
+    bool t,
+  ) async {
     state.triggerSos(child);
     final phone = state.parent.emergencyPhone;
     if (phone.isEmpty) {
       showDialog(
         context: context,
         builder: (dialogContext) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text('🆘', style: TextStyle(fontSize: 56)),
               const SizedBox(height: 12),
               Text(
-                t ? 'তোমার অভিভাবককে জানানো হয়েছে!' : 'Your parent has been alerted!',
+                t
+                    ? 'তোমার অভিভাবককে জানানো হয়েছে!'
+                    : 'Your parent has been alerted!',
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
@@ -257,9 +358,10 @@ class _SosBarState extends State<_SosBar> with SingleTickerProviderStateMixin {
       vsync: this,
       duration: const Duration(milliseconds: 700),
     )..repeat(reverse: true);
-    _pulse = Tween<double>(begin: 1.0, end: 1.08).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _pulse = Tween<double>(
+      begin: 1.0,
+      end: 1.08,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -283,7 +385,10 @@ class _SosBarState extends State<_SosBar> with SingleTickerProviderStateMixin {
           borderRadius: BorderRadius.circular(30),
           onTap: widget.onTap,
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: verticalPadding),
+            padding: EdgeInsets.symmetric(
+              horizontal: horizontalPadding,
+              vertical: verticalPadding,
+            ),
             decoration: BoxDecoration(
               color: const Color(0xFFE53935),
               borderRadius: BorderRadius.circular(30),
@@ -324,7 +429,12 @@ class _StatChip extends StatelessWidget {
   final String sub;
   final Color color;
 
-  const _StatChip({required this.icon, required this.label, required this.sub, required this.color});
+  const _StatChip({
+    required this.icon,
+    required this.label,
+    required this.sub,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -335,7 +445,10 @@ class _StatChip extends StatelessWidget {
           children: [
             Icon(icon, color: color, size: 28),
             const SizedBox(height: 6),
-            Text(label, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             Text(sub, style: const TextStyle(fontSize: 11, color: Colors.grey)),
           ],
         ),
@@ -350,7 +463,12 @@ class _CategoryCard extends StatefulWidget {
   final List<Color> colors;
   final VoidCallback onTap;
 
-  const _CategoryCard({required this.emoji, required this.title, required this.colors, required this.onTap});
+  const _CategoryCard({
+    required this.emoji,
+    required this.title,
+    required this.colors,
+    required this.onTap,
+  });
 
   @override
   State<_CategoryCard> createState() => _CategoryCardState();
@@ -385,17 +503,53 @@ class _CategoryCardState extends State<_CategoryCard> {
               ),
             ],
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: Stack(
             children: [
-              Text(widget.emoji, style: const TextStyle(fontSize: 40)),
-              const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text(
-                  widget.title,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(widget.emoji, style: const TextStyle(fontSize: 40)),
+                  const SizedBox(height: 8),
+                  Flexible(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          widget.title,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Positioned(
+                top: 6,
+                right: 6,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: AppTheme.secondary,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppTheme.secondary.withValues(alpha: 0.5),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.arrow_forward_rounded,
+                    color: Colors.white,
+                    size: 16,
+                  ),
                 ),
               ),
             ],
