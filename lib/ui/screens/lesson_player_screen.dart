@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider/provider.dart';
+import 'package:video_player/video_player.dart';
 import '../../services/mock_data.dart';
 import '../../models/models.dart';
 import '../../logic/app_state.dart';
@@ -117,18 +118,36 @@ class _LessonPlayerScreenState extends State<LessonPlayerScreen> {
                     },
                     itemBuilder: (context, i) {
                       final icon = i < module.stepIcons.length ? module.stepIcons[i] : _emoji(module.category);
+                      final hasVideo = i < module.stepVideos.length && module.stepVideos[i].isNotEmpty;
+                      final hasImage = !hasVideo && i < module.stepImages.length && module.stepImages[i].isNotEmpty;
                       return SingleChildScrollView(
                         key: ValueKey('step-$i'),
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            CartoonInstructionCard(
-                              emoji: icon,
-                              skyColors: _skyColors[module.category]!,
-                              groundColor: _groundColors[module.category]!,
-                              seed: i,
-                            ),
+                            hasVideo
+                                ? _StepVideo(assetPath: module.stepVideos[i])
+                                : hasImage
+                                    ? Container(
+                                        height: 200,
+                                        width: double.infinity,
+                                        decoration: BoxDecoration(
+                                          color: Colors.black.withValues(alpha: 0.04),
+                                          borderRadius: BorderRadius.circular(24),
+                                        ),
+                                        clipBehavior: Clip.antiAlias,
+                                        child: Image.asset(
+                                          module.stepImages[i],
+                                          fit: BoxFit.contain,
+                                        ),
+                                      )
+                                    : CartoonInstructionCard(
+                                        emoji: icon,
+                                        skyColors: _skyColors[module.category]!,
+                                        groundColor: _groundColors[module.category]!,
+                                        seed: i,
+                                      ),
                             const SizedBox(height: 24),
                             Text(
                               steps[i],
@@ -263,5 +282,86 @@ class _LessonPlayerScreenState extends State<LessonPlayerScreen> {
       case HazardCategory.stranger:
         return '🚸';
     }
+  }
+}
+
+class _StepVideo extends StatefulWidget {
+  final String assetPath;
+  const _StepVideo({required this.assetPath});
+
+  @override
+  State<_StepVideo> createState() => _StepVideoState();
+}
+
+class _StepVideoState extends State<_StepVideo> {
+  late final VideoPlayerController _controller;
+  bool _ready = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.asset(widget.assetPath)
+      ..setLooping(true)
+      ..setVolume(0)
+      ..initialize().then((_) {
+        if (!mounted) return;
+        setState(() => _ready = true);
+        _controller.play();
+      });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _togglePlay() {
+    setState(() {
+      _controller.value.isPlaying ? _controller.pause() : _controller.play();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 200,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: !_ready
+          ? const Center(child: CircularProgressIndicator())
+          : GestureDetector(
+              onTap: _togglePlay,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  FittedBox(
+                    fit: BoxFit.contain,
+                    child: SizedBox(
+                      width: _controller.value.size.width,
+                      height: _controller.value.size.height,
+                      child: VideoPlayer(_controller),
+                    ),
+                  ),
+                  AnimatedOpacity(
+                    opacity: _controller.value.isPlaying ? 0 : 1,
+                    duration: const Duration(milliseconds: 200),
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.4),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 32),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+    );
   }
 }

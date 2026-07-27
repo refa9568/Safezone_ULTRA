@@ -65,6 +65,8 @@ class LessonModule {
   final List<String> steps;
   final List<String> stepsBn;
   final List<String> stepIcons;
+  final List<String> stepImages;
+  final List<String> stepVideos;
 
   const LessonModule({
     required this.id,
@@ -78,6 +80,8 @@ class LessonModule {
     this.steps = const [],
     this.stepsBn = const [],
     this.stepIcons = const [],
+    this.stepImages = const [],
+    this.stepVideos = const [],
   });
 }
 

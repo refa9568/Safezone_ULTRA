@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../logic/app_state.dart';
@@ -16,6 +17,25 @@ class ChildShell extends StatefulWidget {
 
 class _ChildShellState extends State<ChildShell> {
   int _index = 0;
+  Timer? _usageTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _usageTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+      final state = context.read<AppState>();
+      final child = state.activeChild;
+      if (child != null && !state.isLocked(child)) {
+        state.addUsageMinutes(child, 1);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _usageTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
