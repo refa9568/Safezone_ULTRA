@@ -143,11 +143,6 @@ class ChildHomeScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const Icon(
-                          Icons.chevron_right_rounded,
-                          color: AppTheme.secondary,
-                          size: 28,
-                        ),
                       ],
                     ),
                   ),
@@ -171,11 +166,6 @@ class ChildHomeScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const Icon(
-                          Icons.chevron_right_rounded,
-                          color: AppTheme.secondary,
-                          size: 28,
-                        ),
                       ],
                     ),
                   ),
@@ -198,11 +188,6 @@ class ChildHomeScreen extends StatelessWidget {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ),
-                        const Icon(
-                          Icons.chevron_right_rounded,
-                          color: AppTheme.secondary,
-                          size: 28,
                         ),
                       ],
                     ),
@@ -247,11 +232,6 @@ class ChildHomeScreen extends StatelessWidget {
                     title: Text(
                       t ? module.titleBn : module.title,
                       style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    trailing: const Icon(
-                      Icons.chevron_right_rounded,
-                      color: AppTheme.secondary,
-                      size: 28,
                     ),
                     onTap: () {
                       Navigator.pop(sheetContext);
@@ -528,29 +508,6 @@ class _CategoryCardState extends State<_CategoryCard> {
                     ),
                   ),
                 ],
-              ),
-              Positioned(
-                top: 6,
-                right: 6,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: AppTheme.secondary,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.secondary.withValues(alpha: 0.5),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.arrow_forward_rounded,
-                    color: Colors.white,
-                    size: 16,
-                  ),
-                ),
               ),
             ],
           ),
