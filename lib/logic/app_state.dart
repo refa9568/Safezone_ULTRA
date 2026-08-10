@@ -1,3 +1,4 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:safezone_ultra/services/mock_data.dart';
 import 'package:safezone_ultra/models/models.dart';
@@ -7,9 +8,14 @@ import 'package:safezone_ultra/backend/quiz_result_repository.dart';
 import 'package:safezone_ultra/backend/badge_repository.dart';
 import 'package:safezone_ultra/backend/chat_message_repository.dart';
 import 'package:safezone_ultra/backend/notification_repository.dart';
+import 'package:safezone_ultra/backend/gemini_service.dart';
 
 class AppState extends ChangeNotifier {
   bool bengali = false;
+
+  /// True while Safety Buddy is waiting on a Gemini response.
+  bool buddyThinking = false;
+  final GeminiService _geminiService = GeminiService();
 
   /// True until [initForUser] has loaded this parent's real data from
   /// Firestore. Also true before any user has signed in.
@@ -390,8 +396,7 @@ class AppState extends ChangeNotifier {
     return !alreadyEarned;
   }
 
-  void askBuddy(Child child, String prompt) {
-    final reply = MockData.chatbotReply(prompt);
+  Future<void> askBuddy(Child child, String prompt) async {
     final now = DateTime.now();
     final userMsg = ChatMessage(
       id: _tempId('msgu'),
@@ -401,17 +406,29 @@ class AppState extends ChangeNotifier {
       createdAt: now,
       isUser: true,
     );
+    chatMessages.add(userMsg);
+    buddyThinking = true;
+    notifyListeners();
+    _chatMessageRepo.add(userMsg).catchError((_) => '');
+
+    String reply;
+    final connectivity = await Connectivity().checkConnectivity();
+    final online = !connectivity.contains(ConnectivityResult.none);
+    final geminiReply = online
+        ? await _geminiService.ask(prompt, bengali: bengali)
+        : null;
+    reply = geminiReply ?? MockData.chatbotReply(prompt, bengali: bengali);
+
     final botMsg = ChatMessage(
       id: _tempId('msgb'),
       childId: child.id,
       prompt: prompt,
       response: reply,
-      createdAt: now.add(const Duration(milliseconds: 1)),
+      createdAt: DateTime.now(),
     );
-    chatMessages.add(userMsg);
     chatMessages.add(botMsg);
+    buddyThinking = false;
     notifyListeners();
-    _chatMessageRepo.add(userMsg).catchError((_) => '');
     _chatMessageRepo.add(botMsg).catchError((_) => '');
   }
 

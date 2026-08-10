@@ -22,21 +22,39 @@ class MockData {
     strangerModule.id: strangerQuiz,
   };
 
-  static const Map<String, String> chatbotAnswers = {
-    'fire':
-        'If you see fire, stay low, cover your mouth, and get out fast! Never hide from firefighters.',
-    'flood':
-        'During a flood, move to higher ground and avoid walking through moving water.',
-    'earthquake': 'Remember: Drop, Cover, and Hold On! Stay away from windows.',
-    'stranger':
-        'Never go anywhere with someone you don\'t know, even if they seem nice. Always tell a trusted adult.',
+  static const Map<HazardCategory, List<String>> _categoryKeywords = {
+    HazardCategory.fire: ['fire', 'burn', 'smoke', 'আগুন', 'পুড়ে'],
+    HazardCategory.flood: ['flood', 'water', 'বন্যা', 'পানি'],
+    HazardCategory.earthquake: ['earthquake', 'shake', 'ভূমিকম্প', 'কম্পন'],
+    HazardCategory.stranger: [
+      'stranger',
+      'unknown person',
+      'অপরিচিত',
+      'অজানা',
+    ],
   };
 
-  static String chatbotReply(String prompt) {
+  /// Offline fallback for the Safety Buddy chat: answers from the actual
+  /// lesson content (title/summary/first step) instead of Gemini.
+  static String chatbotReply(String prompt, {bool bengali = false}) {
     final lower = prompt.toLowerCase();
-    for (final key in chatbotAnswers.keys) {
-      if (lower.contains(key)) return chatbotAnswers[key]!;
+    for (final entry in _categoryKeywords.entries) {
+      if (entry.value.any((k) => lower.contains(k))) {
+        final module = modules.firstWhere(
+          (m) => m.category == entry.key,
+          orElse: () => modules.first,
+        );
+        final summary = bengali ? module.summaryBn : module.summary;
+        final steps = bengali ? module.stepsBn : module.steps;
+        final firstStep = steps.isNotEmpty ? steps.first : null;
+        if (firstStep == null) return summary;
+        return bengali
+            ? '$summary\n\nপ্রথম ধাপ: $firstStep'
+            : '$summary\n\nFirst step: $firstStep';
+      }
     }
-    return "That's a great question! Always remember to stay calm and tell a trusted adult if you feel unsafe.";
+    return bengali
+        ? 'দারুণ প্রশ্ন! সবসময় শান্ত থাকো, আর অনিরাপদ মনে হলে বিশ্বস্ত কোনো বড়কে বলো।'
+        : "That's a great question! Always remember to stay calm and tell a trusted adult if you feel unsafe.";
   }
 }

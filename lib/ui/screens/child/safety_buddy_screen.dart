@@ -20,6 +20,10 @@ class _SafetyBuddyScreenState extends State<SafetyBuddyScreen> {
     final child = state.activeChild!;
     state.askBuddy(child, text);
     _controller.clear();
+    _scrollToBottom();
+  }
+
+  void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
@@ -38,6 +42,7 @@ class _SafetyBuddyScreenState extends State<SafetyBuddyScreen> {
     final messages = state.chatMessages
         .where((m) => m.childId == child.id)
         .toList();
+    _scrollToBottom();
 
     return Scaffold(
       appBar: AppBar(title: const Text('Safety Buddy 🤖')),
@@ -72,8 +77,29 @@ class _SafetyBuddyScreenState extends State<SafetyBuddyScreen> {
                     : ListView.builder(
                         controller: _scrollController,
                         padding: const EdgeInsets.all(16),
-                        itemCount: messages.length,
+                        itemCount: messages.length + (state.buddyThinking ? 1 : 0),
                         itemBuilder: (context, index) {
+                          if (index == messages.length) {
+                            return const Align(
+                              alignment: Alignment.centerLeft,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 6),
+                                child: SizedBox(
+                                  width: 40,
+                                  height: 24,
+                                  child: Center(
+                                    child: SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
                           final m = messages[index];
                           return Align(
                             alignment: m.isUser
