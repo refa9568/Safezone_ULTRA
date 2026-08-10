@@ -44,58 +44,60 @@ class ParentShell extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
           ),
           title: Text(t ? 'সন্তান যোগ করুন' : 'Add Child'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              GestureDetector(
-                onTap: () => pickPhoto(setState),
-                child: CircleAvatar(
-                  radius: 36,
-                  backgroundImage: photoBase64 != null
-                      ? MemoryImage(base64Decode(photoBase64!))
-                      : null,
-                  child: photoBase64 == null
-                      ? const Icon(Icons.add_a_photo_outlined, size: 28)
-                      : null,
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                GestureDetector(
+                  onTap: () => pickPhoto(setState),
+                  child: CircleAvatar(
+                    radius: 36,
+                    backgroundImage: photoBase64 != null
+                        ? MemoryImage(base64Decode(photoBase64!))
+                        : null,
+                    child: photoBase64 == null
+                        ? const Icon(Icons.add_a_photo_outlined, size: 28)
+                        : null,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                t ? 'ছবি যোগ করুন (ঐচ্ছিক)' : 'Add photo (optional)',
-                style: const TextStyle(fontSize: 12, color: Colors.black54),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(labelText: t ? 'নাম' : 'Name'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: ageController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: t ? 'বয়স' : 'Age'),
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                initialValue: sex,
-                decoration: InputDecoration(labelText: t ? 'লিঙ্গ' : 'Sex'),
-                items: [
-                  DropdownMenuItem(
-                    value: 'Female',
-                    child: Text(t ? 'নারী' : 'Female'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Male',
-                    child: Text(t ? 'পুরুষ' : 'Male'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Other',
-                    child: Text(t ? 'অন্যান্য' : 'Other'),
-                  ),
-                ],
-                onChanged: (v) => setState(() => sex = v ?? sex),
-              ),
-            ],
+                const SizedBox(height: 4),
+                Text(
+                  t ? 'ছবি যোগ করুন (ঐচ্ছিক)' : 'Add photo (optional)',
+                  style: const TextStyle(fontSize: 12, color: Colors.black54),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(labelText: t ? 'নাম' : 'Name'),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: ageController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(labelText: t ? 'বয়স' : 'Age'),
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  initialValue: sex,
+                  decoration: InputDecoration(labelText: t ? 'লিঙ্গ' : 'Sex'),
+                  items: [
+                    DropdownMenuItem(
+                      value: 'Female',
+                      child: Text(t ? 'নারী' : 'Female'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Male',
+                      child: Text(t ? 'পুরুষ' : 'Male'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Other',
+                      child: Text(t ? 'অন্যান্য' : 'Other'),
+                    ),
+                  ],
+                  onChanged: (v) => setState(() => sex = v ?? sex),
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(
