@@ -1,0 +1,14 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // TEMPORARY development rules: wide open so the app can read/write
+    // while the backend is being built, since Firebase Auth isn't wired
+    // in yet. Auto-expires 2026-09-09 — replace with rules scoped to
+    // request.auth.uid (matching parentId/childId on each collection)
+    // before that date or before shipping.
+    match /{document=**} {
+      allow read, write: if request.time < timestamp.date(2026, 9, 9);
+    }
+  }
+}
