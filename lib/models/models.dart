@@ -19,7 +19,6 @@ class Parent {
   final String id;
   final String name;
   final String email;
-  int screenTimeLimitMinutes;
   String emergencyPhone;
   String parentPin;
 
@@ -27,7 +26,6 @@ class Parent {
     required this.id,
     required this.name,
     required this.email,
-    this.screenTimeLimitMinutes = 60,
     this.emergencyPhone = '',
     this.parentPin = '1234',
   });
@@ -41,6 +39,7 @@ class Child {
   String avatarEmoji;
   String language; // 'en' or 'bn'
   int usedMinutesToday;
+  int screenTimeLimitMinutes;
 
   Child({
     required this.id,
@@ -50,6 +49,7 @@ class Child {
     required this.avatarEmoji,
     this.language = 'en',
     this.usedMinutesToday = 0,
+    this.screenTimeLimitMinutes = 60,
   });
 }
 

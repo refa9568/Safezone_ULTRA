@@ -9,13 +9,12 @@ class AppState extends ChangeNotifier {
     id: 'p1',
     name: 'Rahim Uddin',
     email: 'parent@example.com',
-    screenTimeLimitMinutes: 45,
     emergencyPhone: '+8801700000000',
   );
 
   final List<Child> children = [
-    Child(id: 'c1', parentId: 'p1', name: 'Adiba', age: 8, avatarEmoji: '🦊'),
-    Child(id: 'c2', parentId: 'p1', name: 'Rafi', age: 6, avatarEmoji: '🐼'),
+    Child(id: 'c1', parentId: 'p1', name: 'Adiba', age: 8, avatarEmoji: '🦊', screenTimeLimitMinutes: 45),
+    Child(id: 'c2', parentId: 'p1', name: 'Rafi', age: 6, avatarEmoji: '🐼', screenTimeLimitMinutes: 45),
   ];
 
   Child? activeChild;
@@ -41,6 +40,7 @@ class AppState extends ChangeNotifier {
     required String name,
     required int age,
     required String sex,
+    int screenTimeLimitMinutes = 60,
   }) {
     final child = Child(
       id: 'c${children.length + 1}',
@@ -48,6 +48,7 @@ class AppState extends ChangeNotifier {
       name: name,
       age: age,
       avatarEmoji: avatarForSex(sex),
+      screenTimeLimitMinutes: screenTimeLimitMinutes,
     );
     children.add(child);
     notifyListeners();
@@ -104,7 +105,7 @@ class AppState extends ChangeNotifier {
   }
 
   int minutesRemaining(Child child) {
-    final remaining = parent.screenTimeLimitMinutes - child.usedMinutesToday;
+    final remaining = child.screenTimeLimitMinutes - child.usedMinutesToday;
     return remaining < 0 ? 0 : remaining;
   }
 
@@ -112,7 +113,7 @@ class AppState extends ChangeNotifier {
 
   void addUsageMinutes(Child child, int minutes) {
     child.usedMinutesToday += minutes;
-    if (child.usedMinutesToday >= parent.screenTimeLimitMinutes) {
+    if (child.usedMinutesToday >= child.screenTimeLimitMinutes) {
       notifications.insert(
         0,
         AppNotification(
@@ -127,8 +128,8 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setScreenTimeLimit(int minutes) {
-    parent.screenTimeLimitMinutes = minutes;
+  void setScreenTimeLimitForChild(Child child, int minutes) {
+    child.screenTimeLimitMinutes = minutes;
     notifyListeners();
   }
 
