@@ -54,6 +54,18 @@ class AppState extends ChangeNotifier {
     return child;
   }
 
+  void removeChildProfile(String childId) {
+    children.removeWhere((c) => c.id == childId);
+    quizResults.removeWhere((r) => r.childId == childId);
+    badges.removeWhere((b) => b.childId == childId);
+    chatMessages.removeWhere((m) => m.childId == childId);
+    notifications.removeWhere((n) => n.childId == childId);
+    if (activeChild?.id == childId) {
+      activeChild = null;
+    }
+    notifyListeners();
+  }
+
   void signInParent() {
     parentMode = true;
     activeChild = null;

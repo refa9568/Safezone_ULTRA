@@ -34,12 +34,11 @@ class _SafetyBuddyScreenState extends State<SafetyBuddyScreen> {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
-    final t = state.bengali;
     final child = state.activeChild!;
     final messages = state.chatMessages.where((m) => m.childId == child.id).toList();
 
     return Scaffold(
-      appBar: AppBar(title: Text(t ? 'নিরাপত্তা বাডি 🤖' : 'Safety Buddy 🤖')),
+      appBar: AppBar(title: const Text('Safety Buddy 🤖')),
       body: Stack(
         children: [
           if (messages.isEmpty) const Positioned.fill(child: FloatingBubbles(count: 10)),
@@ -55,12 +54,10 @@ class _SafetyBuddyScreenState extends State<SafetyBuddyScreen> {
                         children: [
                           const Text('🤖', style: TextStyle(fontSize: 64)),
                           const SizedBox(height: 12),
-                          Text(
-                            t
-                                ? 'আগুন, বন্যা, ভূমিকম্প বা অপরিচিত ব্যক্তি সম্পর্কে আমাকে জিজ্ঞাসা করো!'
-                                : 'Ask me anything about fire, flood, earthquake, or strangers!',
+                          const Text(
+                            'Ask me anything about fire, flood, earthquake, or strangers!',
                             textAlign: TextAlign.center,
-                            style: const TextStyle(color: Colors.grey, fontSize: 16),
+                            style: TextStyle(color: Colors.grey, fontSize: 16),
                           ),
                         ],
                       ),
@@ -102,7 +99,7 @@ class _SafetyBuddyScreenState extends State<SafetyBuddyScreen> {
                     child: TextField(
                       controller: _controller,
                       decoration: InputDecoration(
-                        hintText: t ? 'তোমার প্রশ্ন লেখো...' : 'Type your question...',
+                        hintText: 'Type your question...',
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(24)),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                       ),
