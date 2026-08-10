@@ -74,6 +74,30 @@ class _ChildScreenTimeCard extends StatelessWidget {
     );
   }
 
+  // Turning the switch on with no window picked would default to
+  // 12:00 AM - 11:59 PM (the whole day), which never actually blocks
+  // anything. So flipping it on immediately asks for real start/end times
+  // instead of silently enabling a no-op schedule.
+  Future<void> _enableSchedule(BuildContext context, AppState state) async {
+    final start = await showTimePicker(
+      context: context,
+      initialTime: const TimeOfDay(hour: 17, minute: 0),
+    );
+    if (start == null) return;
+    if (!context.mounted) return;
+    final end = await showTimePicker(
+      context: context,
+      initialTime: const TimeOfDay(hour: 19, minute: 0),
+    );
+    if (end == null) return;
+    state.setScheduleForChild(
+      child,
+      enabled: true,
+      startMinutes: start.hour * 60 + start.minute,
+      endMinutes: end.hour * 60 + end.minute,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
@@ -155,12 +179,18 @@ class _ChildScreenTimeCard extends StatelessWidget {
                 style: const TextStyle(fontSize: 12),
               ),
               value: child.scheduleEnabled,
-              onChanged: (enabled) => state.setScheduleForChild(
-                child,
-                enabled: enabled,
-                startMinutes: child.scheduleStartMinutes,
-                endMinutes: child.scheduleEndMinutes,
-              ),
+              onChanged: (enabled) {
+                if (!enabled) {
+                  state.setScheduleForChild(
+                    child,
+                    enabled: false,
+                    startMinutes: child.scheduleStartMinutes,
+                    endMinutes: child.scheduleEndMinutes,
+                  );
+                  return;
+                }
+                _enableSchedule(context, state);
+              },
             ),
             if (child.scheduleEnabled)
               Row(
