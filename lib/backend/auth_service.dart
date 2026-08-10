@@ -22,6 +22,17 @@ class AuthService {
 
   Future<void> signOut() => _auth.signOut();
 
+  /// Permanently deletes the signed-in Firebase Auth account. Call this
+  /// alongside AppState.deleteAllData() (Firestore) to fully remove a user.
+  /// Firebase requires a recent sign-in for this - if it's been a while,
+  /// this throws 'requires-recent-login' (see [friendlyError]).
+  Future<void> deleteAccount() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      await user.delete();
+    }
+  }
+
   /// Sends a verification link to the currently signed-in user's email.
   /// Call right after [signUp] — no-op if already verified.
   Future<void> sendEmailVerification() async {
@@ -57,6 +68,8 @@ class AuthService {
           return 'Choose a stronger password (6+ characters).';
         case 'network-request-failed':
           return 'No internet connection. Try again.';
+        case 'requires-recent-login':
+          return 'For security, please log out and log back in, then try again.';
         default:
           return error.message ?? 'Something went wrong. Please try again.';
       }

@@ -83,6 +83,31 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Permanently deletes every Firestore document for this parent and all
+  /// their children (quiz results, badges, chat messages, notifications,
+  /// the children themselves, then the parent doc). Pair with
+  /// AuthService.deleteAccount() to fully remove a user - this only clears
+  /// Firestore, not the Firebase Auth account itself.
+  Future<void> deleteAllData() async {
+    for (final child in List<Child>.from(children)) {
+      for (final r in quizResults.where((r) => r.childId == child.id)) {
+        await _quizResultRepo.delete(r.id);
+      }
+      for (final b in badges.where((b) => b.childId == child.id)) {
+        await _badgeRepo.delete(b.id);
+      }
+      for (final m in chatMessages.where((m) => m.childId == child.id)) {
+        await _chatMessageRepo.delete(m.id);
+      }
+      await _childRepo.delete(child.id);
+    }
+    for (final n in List<AppNotification>.from(notifications)) {
+      await _notificationRepo.delete(n.id);
+    }
+    await _parentRepo.delete(parent.id);
+    reset();
+  }
+
   String _tempId(String prefix) =>
       '$prefix${DateTime.now().microsecondsSinceEpoch}';
 
