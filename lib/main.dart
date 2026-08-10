@@ -8,6 +8,7 @@ import 'package:safezone_ultra/ui/theme/app_theme.dart';
 import 'package:safezone_ultra/ui/screens/auth/splash_screen.dart';
 import 'package:safezone_ultra/ui/screens/auth/login_screen.dart';
 import 'package:safezone_ultra/ui/screens/auth/register_screen.dart';
+import 'package:safezone_ultra/ui/screens/auth/verify_email_screen.dart';
 import 'package:safezone_ultra/ui/screens/child/child_profile_select_screen.dart';
 import 'package:safezone_ultra/ui/screens/child/child_shell.dart';
 import 'package:safezone_ultra/ui/screens/lessons/lesson_list_screen.dart';
@@ -44,6 +45,7 @@ class SafeZoneUltraApp extends StatelessWidget {
           '/': (_) => const SplashScreen(),
           '/login': (_) => const LoginScreen(),
           '/register': (_) => const RegisterScreen(),
+          '/verify-email': (_) => const VerifyEmailScreen(),
           '/profiles': (_) => const ChildProfileSelectScreen(),
           '/child': (_) => const ChildShell(),
           '/lessons': (_) => const LessonListScreen(),

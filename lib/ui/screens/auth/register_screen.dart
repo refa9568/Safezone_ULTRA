@@ -52,14 +52,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
     try {
       final credential = await _authService.signUp(email, password);
       final user = credential.user!;
+      // Set the display name on the Auth profile only - no Firestore write
+      // happens here. That's deferred until the email is verified (see
+      // VerifyEmailScreen), so an unverified signup never creates user data.
       await user.updateDisplayName(name);
-      if (!mounted) return;
-      await context.read<AppState>().initForUser(
-        user.uid,
-        name: name,
-        email: email,
-      );
-      if (mounted) Navigator.pushReplacementNamed(context, '/profiles');
+      await _authService.sendEmailVerification();
+      if (mounted) Navigator.pushReplacementNamed(context, '/verify-email');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(

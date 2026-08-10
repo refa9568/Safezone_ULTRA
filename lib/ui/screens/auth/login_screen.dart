@@ -39,8 +39,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _loading = true);
     try {
-      final credential = await _authService.signIn(email, password);
-      final user = credential.user!;
+      await _authService.signIn(email, password);
+      if (!mounted) return;
+      // Reload before trusting emailVerified - the cached value on the
+      // credential can be stale if verification just happened elsewhere.
+      final verified = await _authService.isEmailVerified();
+      if (!verified) {
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/verify-email');
+        }
+        return;
+      }
+      final user = _authService.currentUser!;
       if (!mounted) return;
       await context.read<AppState>().initForUser(
         user.uid,

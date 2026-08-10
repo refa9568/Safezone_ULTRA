@@ -17,12 +17,18 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _getStarted() async {
     final state = context.read<AppState>();
-    final user = AuthService().currentUser;
+    final authService = AuthService();
+    final user = authService.currentUser;
     if (user == null) {
       Navigator.pushReplacementNamed(context, '/login');
       return;
     }
     setState(() => _checkingSession = true);
+    final verified = await authService.isEmailVerified();
+    if (!verified) {
+      if (mounted) Navigator.pushReplacementNamed(context, '/verify-email');
+      return;
+    }
     await state.initForUser(
       user.uid,
       name: user.displayName,

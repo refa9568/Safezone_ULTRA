@@ -22,6 +22,23 @@ class AuthService {
 
   Future<void> signOut() => _auth.signOut();
 
+  /// Sends a verification link to the currently signed-in user's email.
+  /// Call right after [signUp] — no-op if already verified.
+  Future<void> sendEmailVerification() async {
+    final user = _auth.currentUser;
+    if (user != null && !user.emailVerified) {
+      await user.sendEmailVerification();
+    }
+  }
+
+  /// Refreshes the current user from Firebase and reports whether their
+  /// email is verified now. Firestore data must not be written until this
+  /// returns true.
+  Future<bool> isEmailVerified() async {
+    await _auth.currentUser?.reload();
+    return _auth.currentUser?.emailVerified ?? false;
+  }
+
   /// Turns a FirebaseAuthException into a message safe to show a parent.
   String friendlyError(Object error) {
     if (error is FirebaseAuthException) {
