@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:safezone_ultra/services/mock_data.dart';
 import 'package:safezone_ultra/models/models.dart';
-import 'package:safezone_ultra/backend/local_identity.dart';
 import 'package:safezone_ultra/backend/parent_repository.dart';
 import 'package:safezone_ultra/backend/child_repository.dart';
 import 'package:safezone_ultra/backend/quiz_result_repository.dart';
@@ -12,7 +11,8 @@ import 'package:safezone_ultra/backend/notification_repository.dart';
 class AppState extends ChangeNotifier {
   bool bengali = false;
 
-  /// True until [init] has loaded this household's real data from Firestore.
+  /// True until [initForUser] has loaded this parent's real data from
+  /// Firestore. Also true before any user has signed in.
   bool loading = true;
 
   final ParentRepository _parentRepo = ParentRepository();
@@ -33,16 +33,22 @@ class AppState extends ChangeNotifier {
   List<ChatMessage> chatMessages = [];
   List<AppNotification> notifications = [];
 
-  /// Loads this device's parent/children/history from Firestore, creating a
-  /// Parent document on first launch. Every mutating method below updates
-  /// local state immediately (so the UI never waits on the network) and
-  /// persists the change to Firestore in the background.
-  Future<void> init() async {
-    final id = await LocalIdentity.parentId();
-    final existingParent = await _parentRepo.getById(id);
-    parent = existingParent ?? Parent(id: id, name: 'Parent', email: '');
+  /// Loads the signed-in parent's data from Firestore, keyed by their
+  /// Firebase Auth [uid]. Creates the Parent document on first sign-in
+  /// (using [name]/[email] if given — e.g. right after registration).
+  /// Every mutating method below updates local state immediately (so the UI
+  /// never waits on the network) and persists the change to Firestore in
+  /// the background.
+  Future<void> initForUser(String uid, {String? name, String? email}) async {
+    loading = true;
+    notifyListeners();
+
+    final existingParent = await _parentRepo.getById(uid);
+    parent =
+        existingParent ??
+        Parent(id: uid, name: name ?? 'Parent', email: email ?? '');
     if (existingParent == null) {
-      await _parentRepo.set(id, parent);
+      await _parentRepo.set(uid, parent);
     }
 
     children = await _childRepo.streamForParent(parent.id).first;
@@ -59,6 +65,21 @@ class AppState extends ChangeNotifier {
     chatMessages.sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
     loading = false;
+    notifyListeners();
+  }
+
+  /// Clears cached data on sign-out so a different account signing in on
+  /// this device never sees the previous parent's data.
+  void reset() {
+    parent = Parent(id: '', name: 'Parent', email: '');
+    children = [];
+    activeChild = null;
+    parentMode = false;
+    quizResults = [];
+    badges = [];
+    chatMessages = [];
+    notifications = [];
+    loading = true;
     notifyListeners();
   }
 
@@ -154,12 +175,6 @@ class AppState extends ChangeNotifier {
     for (final id in notifIds) {
       _notificationRepo.delete(id).catchError((_) {});
     }
-  }
-
-  void signInParent() {
-    parentMode = true;
-    activeChild = null;
-    notifyListeners();
   }
 
   void toggleLanguage() {

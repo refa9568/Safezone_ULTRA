@@ -33,7 +33,7 @@ class SafeZoneUltraApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => AppState()..init(),
+      create: (_) => AppState(),
       child: MaterialApp(
         title: 'SafeZone Ultra',
         debugShowCheckedModeBanner: false,

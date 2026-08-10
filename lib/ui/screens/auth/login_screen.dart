@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:safezone_ultra/backend/auth_service.dart';
 import 'package:safezone_ultra/logic/app_state.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -10,14 +11,52 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _emailController = TextEditingController(text: 'parent@example.com');
-  final _passwordController = TextEditingController(text: 'password');
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _authService = AuthService();
+  bool _loading = false;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _login(bool t) async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            t ? 'ইমেইল ও পাসওয়ার্ড দিন' : 'Enter your email and password',
+          ),
+        ),
+      );
+      return;
+    }
+
+    setState(() => _loading = true);
+    try {
+      final credential = await _authService.signIn(email, password);
+      final user = credential.user!;
+      if (!mounted) return;
+      await context.read<AppState>().initForUser(
+        user.uid,
+        name: user.displayName,
+        email: user.email,
+      );
+      if (mounted) Navigator.pushReplacementNamed(context, '/profiles');
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(_authService.friendlyError(e))));
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   @override
@@ -69,15 +108,20 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
-                  onPressed: () {
-                    state.signInParent();
-                    Navigator.pushReplacementNamed(context, '/profiles');
-                  },
-                  child: Text(t ? 'লগইন' : 'Login'),
+                  onPressed: _loading ? null : () => _login(t),
+                  child: _loading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(t ? 'লগইন' : 'Login'),
                 ),
                 const SizedBox(height: 12),
                 TextButton(
-                  onPressed: () => Navigator.pushNamed(context, '/register'),
+                  onPressed: _loading
+                      ? null
+                      : () => Navigator.pushNamed(context, '/register'),
                   child: Text(
                     t
                         ? 'নতুন অ্যাকাউন্ট? নিবন্ধন করুন'

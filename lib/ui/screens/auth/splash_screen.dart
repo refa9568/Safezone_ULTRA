@@ -1,11 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:safezone_ultra/backend/auth_service.dart';
 import 'package:safezone_ultra/logic/app_state.dart';
 import 'package:safezone_ultra/ui/theme/app_theme.dart';
 import 'package:safezone_ultra/ui/widgets/floating_bubbles.dart';
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  bool _checkingSession = false;
+
+  Future<void> _getStarted() async {
+    final state = context.read<AppState>();
+    final user = AuthService().currentUser;
+    if (user == null) {
+      Navigator.pushReplacementNamed(context, '/login');
+      return;
+    }
+    setState(() => _checkingSession = true);
+    await state.initForUser(
+      user.uid,
+      name: user.displayName,
+      email: user.email,
+    );
+    if (mounted) Navigator.pushReplacementNamed(context, '/profiles');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +47,7 @@ class SplashScreen extends StatelessWidget {
           children: [
             const Positioned.fill(child: FloatingBubbles(count: 18)),
             SafeArea(
-              child: Padding(
+              child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -88,11 +112,16 @@ class SplashScreen extends StatelessWidget {
                           backgroundColor: Colors.white,
                           foregroundColor: AppTheme.primary,
                         ),
-                        onPressed: () =>
-                            Navigator.pushReplacementNamed(context, '/login'),
-                        child: Text(
-                          state.bengali ? 'শুরু করুন' : 'Get Started',
-                        ),
+                        onPressed: _checkingSession ? null : _getStarted,
+                        child: _checkingSession
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(state.bengali ? 'শুরু করুন' : 'Get Started'),
                       ),
                     ),
                   ],

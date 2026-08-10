@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:safezone_ultra/backend/auth_service.dart';
 import 'package:safezone_ultra/logic/app_state.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -11,20 +12,63 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _nameController = TextEditingController();
-  final _mobileController = TextEditingController();
   final _emailController = TextEditingController();
-  final _ageController = TextEditingController();
   final _passwordController = TextEditingController();
-  String _sex = 'Female';
+  final _confirmPasswordController = TextEditingController();
+  final _authService = AuthService();
+  bool _loading = false;
 
   @override
   void dispose() {
     _nameController.dispose();
-    _mobileController.dispose();
     _emailController.dispose();
-    _ageController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _register(bool t) async {
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    final confirmPassword = _confirmPasswordController.text;
+
+    if (name.isEmpty || email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(t ? 'সব ঘর পূরণ করুন' : 'Fill in all fields')),
+      );
+      return;
+    }
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(t ? 'পাসওয়ার্ড মিলছে না' : 'Passwords do not match'),
+        ),
+      );
+      return;
+    }
+
+    setState(() => _loading = true);
+    try {
+      final credential = await _authService.signUp(email, password);
+      final user = credential.user!;
+      await user.updateDisplayName(name);
+      if (!mounted) return;
+      await context.read<AppState>().initForUser(
+        user.uid,
+        name: name,
+        email: email,
+      );
+      if (mounted) Navigator.pushReplacementNamed(context, '/profiles');
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(_authService.friendlyError(e))));
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   @override
@@ -66,61 +110,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 16),
                 TextField(
-                  controller: _mobileController,
-                  keyboardType: TextInputType.phone,
-                  decoration: InputDecoration(
-                    labelText: t ? 'মোবাইল নম্বর' : 'Mobile Number',
-                    border: const OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
                     labelText: t ? 'ইমেইল' : 'Email',
                     border: const OutlineInputBorder(),
                   ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _ageController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: t ? 'বয়স' : 'Age',
-                          border: const OutlineInputBorder(),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        initialValue: _sex,
-                        decoration: InputDecoration(
-                          labelText: t ? 'লিঙ্গ' : 'Sex',
-                          border: const OutlineInputBorder(),
-                        ),
-                        items: [
-                          DropdownMenuItem(
-                            value: 'Female',
-                            child: Text(t ? 'নারী' : 'Female'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'Male',
-                            child: Text(t ? 'পুরুষ' : 'Male'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'Other',
-                            child: Text(t ? 'অন্যান্য' : 'Other'),
-                          ),
-                        ],
-                        onChanged: (v) => setState(() => _sex = v ?? _sex),
-                      ),
-                    ),
-                  ],
                 ),
                 const SizedBox(height: 16),
                 TextField(
@@ -131,42 +126,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     border: const OutlineInputBorder(),
                   ),
                 ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _confirmPasswordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: t
+                        ? 'পাসওয়ার্ড নিশ্চিত করুন'
+                        : 'Confirm Password',
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
                 const SizedBox(height: 24),
                 ElevatedButton(
-                  onPressed: () {
-                    final name = _nameController.text.trim();
-                    final age = int.tryParse(_ageController.text.trim());
-
-                    if (name.isEmpty || age == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            t
-                                ? 'নাম এবং বয়স সঠিকভাবে লিখুন'
-                                : 'Enter a valid name and age',
-                          ),
-                        ),
-                      );
-                      return;
-                    }
-
-                    state.addChildProfile(name: name, age: age, sex: _sex);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          t
-                              ? '$name প্রোফাইল তৈরি হয়েছে'
-                              : '$name profile created',
-                        ),
-                      ),
-                    );
-                    Navigator.pushReplacementNamed(context, '/profiles');
-                  },
-                  child: Text(t ? 'নিবন্ধন করুন' : 'Register'),
+                  onPressed: _loading ? null : () => _register(t),
+                  child: _loading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(t ? 'নিবন্ধন করুন' : 'Register'),
                 ),
                 const SizedBox(height: 12),
                 TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: _loading ? null : () => Navigator.pop(context),
                   child: Text(
                     t
                         ? 'ইতিমধ্যে অ্যাকাউন্ট আছে? লগইন করুন'

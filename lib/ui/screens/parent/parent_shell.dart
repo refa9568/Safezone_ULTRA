@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:safezone_ultra/backend/auth_service.dart';
 import 'package:safezone_ultra/models/models.dart';
 import 'package:safezone_ultra/logic/app_state.dart';
 import 'package:safezone_ultra/ui/theme/app_theme.dart';
@@ -194,11 +195,17 @@ class ParentShell extends StatelessWidget {
               ListTile(
                 leading: const Icon(Icons.logout),
                 title: Text(t ? 'লগআউট' : 'Log Out'),
-                onTap: () => Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  '/',
-                  (r) => false,
-                ),
+                onTap: () async {
+                  await AuthService().signOut();
+                  state.reset();
+                  if (context.mounted) {
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      '/',
+                      (r) => false,
+                    );
+                  }
+                },
               ),
             ],
           ),
