@@ -9,7 +9,18 @@ class FloatingBubbles extends StatefulWidget {
   const FloatingBubbles({
     super.key,
     this.count = 14,
-    this.emojis = const ['🎈', '🫧', '⭐', '✨', '🌟', '🧸', '🎉', '🐟', '🦋', '🌈'],
+    this.emojis = const [
+      '🎈',
+      '🫧',
+      '⭐',
+      '✨',
+      '🌟',
+      '🧸',
+      '🎉',
+      '🐟',
+      '🦋',
+      '🌈',
+    ],
   });
 
   @override
@@ -41,7 +52,8 @@ class _Pop {
   _Pop(this.id, this.x, this.y);
 }
 
-class _FloatingBubblesState extends State<FloatingBubbles> with SingleTickerProviderStateMixin {
+class _FloatingBubblesState extends State<FloatingBubbles>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final List<_Bubble> _bubbles;
   final List<_Pop> _pops = [];
@@ -60,7 +72,10 @@ class _FloatingBubblesState extends State<FloatingBubbles> with SingleTickerProv
         sway: 12 + random.nextDouble() * 24,
       );
     });
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 20))..repeat();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 20),
+    )..repeat();
   }
 
   @override
@@ -96,24 +111,29 @@ class _FloatingBubblesState extends State<FloatingBubbles> with SingleTickerProv
               return Stack(
                 children: [
                   for (final b in _bubbles)
-                    Builder(builder: (_) {
-                      final t = (_controller.value * b.speed + b.phase) % 1.0;
-                      final y = h * (1 - t);
-                      final x = b.startX * w + sin(t * 2 * pi) * b.sway;
-                      final opacity = (sin(t * pi)).clamp(0.0, 1.0);
-                      return Positioned(
-                        left: x,
-                        top: y,
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.translucent,
-                          onTap: () => _popBubble(b, x, y),
-                          child: Opacity(
-                            opacity: opacity * 0.55,
-                            child: Text(b.emoji, style: TextStyle(fontSize: b.size)),
+                    Builder(
+                      builder: (_) {
+                        final t = (_controller.value * b.speed + b.phase) % 1.0;
+                        final y = h * (1 - t);
+                        final x = b.startX * w + sin(t * 2 * pi) * b.sway;
+                        final opacity = (sin(t * pi)).clamp(0.0, 1.0);
+                        return Positioned(
+                          left: x,
+                          top: y,
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onTap: () => _popBubble(b, x, y),
+                            child: Opacity(
+                              opacity: opacity * 0.55,
+                              child: Text(
+                                b.emoji,
+                                style: TextStyle(fontSize: b.size),
+                              ),
+                            ),
                           ),
-                        ),
-                      );
-                    }),
+                        );
+                      },
+                    ),
                   for (final pop in _pops)
                     Positioned(
                       left: pop.x - 30,
@@ -140,14 +160,17 @@ class _PopBurst extends StatefulWidget {
   State<_PopBurst> createState() => _PopBurstState();
 }
 
-class _PopBurstState extends State<_PopBurst> with SingleTickerProviderStateMixin {
+class _PopBurstState extends State<_PopBurst>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 450))
-      ..forward().whenComplete(widget.onDone);
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 450),
+    )..forward().whenComplete(widget.onDone);
   }
 
   @override
@@ -166,7 +189,9 @@ class _PopBurstState extends State<_PopBurst> with SingleTickerProviderStateMixi
           opacity: (1 - t).clamp(0.0, 1.0),
           child: Transform.scale(
             scale: 0.6 + t * 1.2,
-            child: const Center(child: Text('✨', style: TextStyle(fontSize: 26))),
+            child: const Center(
+              child: Text('✨', style: TextStyle(fontSize: 26)),
+            ),
           ),
         );
       },

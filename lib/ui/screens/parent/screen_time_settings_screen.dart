@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../logic/app_state.dart';
-import '../../models/models.dart';
+import 'package:safezone_ultra/logic/app_state.dart';
+import 'package:safezone_ultra/models/models.dart';
 
 class ScreenTimeSettingsScreen extends StatelessWidget {
   const ScreenTimeSettingsScreen({super.key});
@@ -12,18 +12,27 @@ class ScreenTimeSettingsScreen extends StatelessWidget {
     final t = state.bengali;
 
     return Scaffold(
-      appBar: AppBar(title: Text(t ? 'স্ক্রিন টাইম সেটিংস' : 'Screen Time Settings')),
+      appBar: AppBar(
+        title: Text(t ? 'স্ক্রিন টাইম সেটিংস' : 'Screen Time Settings'),
+      ),
       body: state.children.isEmpty
-          ? Center(child: Text(t ? 'কোনো সন্তান যোগ করা হয়নি' : 'No children added yet'))
+          ? Center(
+              child: Text(
+                t ? 'কোনো সন্তান যোগ করা হয়নি' : 'No children added yet',
+              ),
+            )
           : ListView(
               padding: const EdgeInsets.all(20),
               children: [
                 Text(
-                  t ? 'প্রতিটি সন্তানের জন্য প্রতিদিনের সর্বোচ্চ ব্যবহারের সময় সেট করুন' : "Set each child's daily maximum usage limit",
+                  t
+                      ? 'প্রতিটি সন্তানের জন্য প্রতিদিনের সর্বোচ্চ ব্যবহারের সময় সেট করুন'
+                      : "Set each child's daily maximum usage limit",
                   style: const TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 16),
-                for (final child in state.children) _ChildScreenTimeCard(child: child),
+                for (final child in state.children)
+                  _ChildScreenTimeCard(child: child),
               ],
             ),
     );
@@ -52,10 +61,18 @@ class _ChildScreenTimeCard extends StatelessWidget {
                 Text(child.avatarEmoji, style: const TextStyle(fontSize: 28)),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(child.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                  child: Text(
+                    child.name,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
                 Text(
-                  state.isLocked(child) ? (t ? 'লকড' : 'Locked') : (t ? 'সক্রিয়' : 'Active'),
+                  state.isLocked(child)
+                      ? (t ? 'লকড' : 'Locked')
+                      : (t ? 'সক্রিয়' : 'Active'),
                   style: TextStyle(
                     color: state.isLocked(child) ? Colors.red : Colors.green,
                     fontWeight: FontWeight.bold,
@@ -65,16 +82,28 @@ class _ChildScreenTimeCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Center(
-              child: Text('$limit', style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
+              child: Text(
+                '$limit',
+                style: const TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
-            Center(child: Text(t ? 'মিনিট / দিন' : 'minutes / day', style: const TextStyle(color: Colors.grey))),
+            Center(
+              child: Text(
+                t ? 'মিনিট / দিন' : 'minutes / day',
+                style: const TextStyle(color: Colors.grey),
+              ),
+            ),
             Slider(
               value: limit.toDouble(),
               min: 15,
               max: 180,
               divisions: 33,
               label: '$limit min',
-              onChanged: (value) => state.setScreenTimeLimitForChild(child, value.round()),
+              onChanged: (value) =>
+                  state.setScreenTimeLimitForChild(child, value.round()),
             ),
             Text(
               '${child.usedMinutesToday} / $limit ${t ? "মিনিট ব্যবহৃত" : "min used today"}',

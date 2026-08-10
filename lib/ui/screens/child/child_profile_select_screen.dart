@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../models/models.dart';
-import '../../logic/app_state.dart';
-import '../widgets/floating_bubbles.dart';
+import 'package:safezone_ultra/models/models.dart';
+import 'package:safezone_ultra/logic/app_state.dart';
+import 'package:safezone_ultra/ui/widgets/floating_bubbles.dart';
 
 const List<List<Color>> _kidCardColors = [
   [Color(0xFFFFE0B2), Color(0xFFFFCC80)],
@@ -14,7 +14,11 @@ const List<List<Color>> _kidCardColors = [
 class ChildProfileSelectScreen extends StatelessWidget {
   const ChildProfileSelectScreen({super.key});
 
-  Future<void> _requestParentAccess(BuildContext context, AppState state, bool t) async {
+  Future<void> _requestParentAccess(
+    BuildContext context,
+    AppState state,
+    bool t,
+  ) async {
     final controller = TextEditingController();
     String? errorText;
 
@@ -22,7 +26,9 @@ class ChildProfileSelectScreen extends StatelessWidget {
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (dialogContext, setDialogState) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           title: Text(t ? 'অভিভাবক পিন দিন' : 'Enter Parent PIN'),
           content: TextField(
             controller: controller,
@@ -38,7 +44,9 @@ class ChildProfileSelectScreen extends StatelessWidget {
               if (state.verifyParentPin(controller.text.trim())) {
                 Navigator.pop(dialogContext, true);
               } else {
-                setDialogState(() => errorText = t ? 'ভুল পিন' : 'Incorrect PIN');
+                setDialogState(
+                  () => errorText = t ? 'ভুল পিন' : 'Incorrect PIN',
+                );
               }
             },
           ),
@@ -52,7 +60,9 @@ class ChildProfileSelectScreen extends StatelessWidget {
                 if (state.verifyParentPin(controller.text.trim())) {
                   Navigator.pop(dialogContext, true);
                 } else {
-                  setDialogState(() => errorText = t ? 'ভুল পিন' : 'Incorrect PIN');
+                  setDialogState(
+                    () => errorText = t ? 'ভুল পিন' : 'Incorrect PIN',
+                  );
                 }
               },
               child: Text(t ? 'প্রবেশ করুন' : 'Enter'),
@@ -119,7 +129,11 @@ class _ChildCard extends StatefulWidget {
   final List<Color> colors;
   final VoidCallback onTap;
 
-  const _ChildCard({required this.child, required this.colors, required this.onTap});
+  const _ChildCard({
+    required this.child,
+    required this.colors,
+    required this.onTap,
+  });
 
   @override
   State<_ChildCard> createState() => _ChildCardState();
@@ -158,7 +172,10 @@ class _ChildCardState extends State<_ChildCard> {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(widget.child.avatarEmoji, style: const TextStyle(fontSize: 60)),
+              Text(
+                widget.child.avatarEmoji,
+                style: const TextStyle(fontSize: 60),
+              ),
               const SizedBox(height: 8),
               Flexible(
                 child: Padding(
@@ -167,12 +184,19 @@ class _ChildCardState extends State<_ChildCard> {
                     fit: BoxFit.scaleDown,
                     child: Text(
                       widget.child.name,
-                      style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Colors.black87),
+                      style: const TextStyle(
+                        fontSize: 19,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
                     ),
                   ),
                 ),
               ),
-              Text('Age ${widget.child.age}', style: const TextStyle(color: Colors.black54)),
+              Text(
+                'Age ${widget.child.age}',
+                style: const TextStyle(color: Colors.black54),
+              ),
             ],
           ),
         ),

@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../logic/app_state.dart';
-import 'child_home_screen.dart';
-import 'lesson_list_screen.dart';
-import 'safety_buddy_screen.dart';
-import 'badge_collection_screen.dart';
-import 'locked_screen.dart';
+import 'package:safezone_ultra/logic/app_state.dart';
+import 'package:safezone_ultra/ui/screens/child/child_home_screen.dart';
+import 'package:safezone_ultra/ui/screens/lessons/lesson_list_screen.dart';
+import 'package:safezone_ultra/ui/screens/child/safety_buddy_screen.dart';
+import 'package:safezone_ultra/ui/screens/badges/badge_collection_screen.dart';
+import 'package:safezone_ultra/ui/screens/child/locked_screen.dart';
 
 class ChildShell extends StatefulWidget {
   const ChildShell({super.key});
@@ -64,10 +64,22 @@ class _ChildShellState extends State<ChildShell> {
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
         destinations: [
-          NavigationDestination(icon: const Icon(Icons.home_rounded), label: t ? 'হোম' : 'Home'),
-          NavigationDestination(icon: const Icon(Icons.menu_book_rounded), label: t ? 'পাঠ' : 'Lessons'),
-          NavigationDestination(icon: const Icon(Icons.smart_toy_rounded), label: t ? 'বাডি' : 'Buddy'),
-          NavigationDestination(icon: const Icon(Icons.emoji_events_rounded), label: t ? 'ব্যাজ' : 'Badges'),
+          NavigationDestination(
+            icon: const Icon(Icons.home_rounded),
+            label: t ? 'হোম' : 'Home',
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.menu_book_rounded),
+            label: t ? 'পাঠ' : 'Lessons',
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.smart_toy_rounded),
+            label: t ? 'বাডি' : 'Buddy',
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.emoji_events_rounded),
+            label: t ? 'ব্যাজ' : 'Badges',
+          ),
         ],
       ),
     );

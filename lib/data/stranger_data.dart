@@ -1,4 +1,4 @@
-import '../models/models.dart';
+import 'package:safezone_ultra/models/models.dart';
 
 final LessonModule strangerModule = const LessonModule(
   id: 'm4',
@@ -58,9 +58,29 @@ final LessonModule strangerModule = const LessonModule(
     'কোনো ঘটনার পর অপরিচিত ব্যক্তির চেহারা বিশ্বস্ত বড় বা পুলিশকে স্পষ্টভাবে বর্ণনা করো।',
   ],
   stepIcons: [
-    '🙅', '🍬', '🚗', '✋', '👨‍👩‍👧', '📢', '📱', '💻',
-    '👮', '🧑‍🤝‍🧑', '🔑', '🚪', '💭', '🏠', '📏', '😱',
-    '🗣️', '🌳', '🐶', '🚙', '🏪', '🎭', '📝',
+    '🙅',
+    '🍬',
+    '🚗',
+    '✋',
+    '👨‍👩‍👧',
+    '📢',
+    '📱',
+    '💻',
+    '👮',
+    '🧑‍🤝‍🧑',
+    '🔑',
+    '🚪',
+    '💭',
+    '🏠',
+    '📏',
+    '😱',
+    '🗣️',
+    '🌳',
+    '🐶',
+    '🚙',
+    '🏪',
+    '🎭',
+    '📝',
   ],
   stepImages: [
     'assets/lessons/stranger/stranger_01.png',
@@ -97,7 +117,8 @@ final Quiz strangerQuiz = const Quiz(
   questions: [
     QuizQuestion(
       question: 'A stranger offers you candy to go with them. What do you do?',
-      questionBn: 'একজন অপরিচিত ব্যক্তি তোমাকে মিষ্টি দিয়ে সাথে যেতে বলে। তুমি কী করবে?',
+      questionBn:
+          'একজন অপরিচিত ব্যক্তি তোমাকে মিষ্টি দিয়ে সাথে যেতে বলে। তুমি কী করবে?',
       options: [
         'Go with them',
         'Say no and tell a trusted adult',
@@ -113,8 +134,10 @@ final Quiz strangerQuiz = const Quiz(
       correctIndex: 1,
     ),
     QuizQuestion(
-      question: 'What should you do if a stranger asks you to get in their car?',
-      questionBn: 'একজন অপরিচিত ব্যক্তি তোমাকে তার গাড়িতে উঠতে বললে তুমি কী করবে?',
+      question:
+          'What should you do if a stranger asks you to get in their car?',
+      questionBn:
+          'একজন অপরিচিত ব্যক্তি তোমাকে তার গাড়িতে উঠতে বললে তুমি কী করবে?',
       options: [
         'Get in quickly',
         'Say no and run to a trusted adult',
@@ -181,7 +204,8 @@ final Quiz strangerQuiz = const Quiz(
       correctIndex: 1,
     ),
     QuizQuestion(
-      question: 'Should you open the door for a stranger when you are home alone?',
+      question:
+          'Should you open the door for a stranger when you are home alone?',
       questionBn: 'একা বাসায় থাকলে অপরিচিত কারো জন্য দরজা খোলা উচিত কি?',
       options: [
         'Yes, always',
@@ -198,8 +222,10 @@ final Quiz strangerQuiz = const Quiz(
       correctIndex: 1,
     ),
     QuizQuestion(
-      question: 'What should you do if a stranger in a car asks you for directions?',
-      questionBn: 'গাড়িতে থাকা অপরিচিত ব্যক্তি রাস্তা জিজ্ঞেস করলে তোমার কী করা উচিত?',
+      question:
+          'What should you do if a stranger in a car asks you for directions?',
+      questionBn:
+          'গাড়িতে থাকা অপরিচিত ব্যক্তি রাস্তা জিজ্ঞেস করলে তোমার কী করা উচিত?',
       options: [
         'Get close to help them',
         'Stay at a safe distance and be cautious',
@@ -215,8 +241,10 @@ final Quiz strangerQuiz = const Quiz(
       correctIndex: 1,
     ),
     QuizQuestion(
-      question: 'If you feel uncomfortable around someone, even without a clear reason, what should you do?',
-      questionBn: 'কোনো কারণ ছাড়াই কারো আশেপাশে অস্বস্তি বোধ করলে তোমার কী করা উচিত?',
+      question:
+          'If you feel uncomfortable around someone, even without a clear reason, what should you do?',
+      questionBn:
+          'কোনো কারণ ছাড়াই কারো আশেপাশে অস্বস্তি বোধ করলে তোমার কী করা উচিত?',
       options: [
         'Ignore the feeling',
         'Trust your feelings and walk away',
@@ -232,8 +260,10 @@ final Quiz strangerQuiz = const Quiz(
       correctIndex: 1,
     ),
     QuizQuestion(
-      question: 'After any encounter with a stranger that felt weird, what should you always do?',
-      questionBn: 'অপরিচিত ব্যক্তির সাথে অদ্ভুত লাগা কোনো ঘটনার পর তোমার সবসময় কী করা উচিত?',
+      question:
+          'After any encounter with a stranger that felt weird, what should you always do?',
+      questionBn:
+          'অপরিচিত ব্যক্তির সাথে অদ্ভুত লাগা কোনো ঘটনার পর তোমার সবসময় কী করা উচিত?',
       options: [
         'Keep it a secret',
         'Tell a trusted adult right away',

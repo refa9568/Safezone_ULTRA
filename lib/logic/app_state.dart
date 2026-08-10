@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../services/mock_data.dart';
-import '../models/models.dart';
+import 'package:safezone_ultra/services/mock_data.dart';
+import 'package:safezone_ultra/models/models.dart';
 
 class AppState extends ChangeNotifier {
   bool bengali = false;
@@ -13,8 +13,22 @@ class AppState extends ChangeNotifier {
   );
 
   final List<Child> children = [
-    Child(id: 'c1', parentId: 'p1', name: 'Adiba', age: 8, avatarEmoji: '🦊', screenTimeLimitMinutes: 45),
-    Child(id: 'c2', parentId: 'p1', name: 'Rafi', age: 6, avatarEmoji: '🐼', screenTimeLimitMinutes: 45),
+    Child(
+      id: 'c1',
+      parentId: 'p1',
+      name: 'Adiba',
+      age: 8,
+      avatarEmoji: '🦊',
+      screenTimeLimitMinutes: 45,
+    ),
+    Child(
+      id: 'c2',
+      parentId: 'p1',
+      name: 'Rafi',
+      age: 6,
+      avatarEmoji: '🐼',
+      screenTimeLimitMinutes: 45,
+    ),
   ];
 
   Child? activeChild;

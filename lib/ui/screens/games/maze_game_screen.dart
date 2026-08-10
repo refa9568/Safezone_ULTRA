@@ -1,9 +1,9 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../logic/app_state.dart';
-import '../theme/app_theme.dart';
-import '../widgets/popping_arrow_button.dart';
+import 'package:safezone_ultra/logic/app_state.dart';
+import 'package:safezone_ultra/ui/theme/app_theme.dart';
+import 'package:safezone_ultra/ui/widgets/popping_arrow_button.dart';
 
 /// Generates a fully-connected, guaranteed-solvable maze using randomized
 /// depth-first search (recursive backtracker) on a doubled grid, where

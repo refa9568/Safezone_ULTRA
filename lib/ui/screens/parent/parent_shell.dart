@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../models/models.dart';
-import '../../logic/app_state.dart';
-import '../theme/app_theme.dart';
-import 'notification_center_screen.dart';
+import 'package:safezone_ultra/models/models.dart';
+import 'package:safezone_ultra/logic/app_state.dart';
+import 'package:safezone_ultra/ui/theme/app_theme.dart';
+import 'package:safezone_ultra/ui/screens/parent/notification_center_screen.dart';
 
 class ParentShell extends StatelessWidget {
   const ParentShell({super.key});
 
-  Future<void> _showAddChildDialog(BuildContext context, AppState state, bool t) async {
+  Future<void> _showAddChildDialog(
+    BuildContext context,
+    AppState state,
+    bool t,
+  ) async {
     final nameController = TextEditingController();
     final ageController = TextEditingController();
     String sex = 'Female';
@@ -17,7 +21,9 @@ class ParentShell extends StatelessWidget {
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (dialogContext, setState) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           title: Text(t ? 'সন্তান যোগ করুন' : 'Add Child'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -37,9 +43,18 @@ class ParentShell extends StatelessWidget {
                 initialValue: sex,
                 decoration: InputDecoration(labelText: t ? 'লিঙ্গ' : 'Sex'),
                 items: [
-                  DropdownMenuItem(value: 'Female', child: Text(t ? 'নারী' : 'Female')),
-                  DropdownMenuItem(value: 'Male', child: Text(t ? 'পুরুষ' : 'Male')),
-                  DropdownMenuItem(value: 'Other', child: Text(t ? 'অন্যান্য' : 'Other')),
+                  DropdownMenuItem(
+                    value: 'Female',
+                    child: Text(t ? 'নারী' : 'Female'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Male',
+                    child: Text(t ? 'পুরুষ' : 'Male'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Other',
+                    child: Text(t ? 'অন্যান্য' : 'Other'),
+                  ),
                 ],
                 onChanged: (v) => setState(() => sex = v ?? sex),
               ),
@@ -56,14 +71,26 @@ class ParentShell extends StatelessWidget {
                 final age = int.tryParse(ageController.text.trim());
                 if (name.isEmpty || age == null) {
                   ScaffoldMessenger.of(dialogContext).showSnackBar(
-                    SnackBar(content: Text(t ? 'নাম এবং বয়স সঠিকভাবে লিখুন' : 'Enter a valid name and age')),
+                    SnackBar(
+                      content: Text(
+                        t
+                            ? 'নাম এবং বয়স সঠিকভাবে লিখুন'
+                            : 'Enter a valid name and age',
+                      ),
+                    ),
                   );
                   return;
                 }
                 state.addChildProfile(name: name, age: age, sex: sex);
                 Navigator.pop(dialogContext);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(t ? '$name প্রোফাইল তৈরি হয়েছে' : '$name profile created')),
+                  SnackBar(
+                    content: Text(
+                      t
+                          ? '$name প্রোফাইল তৈরি হয়েছে'
+                          : '$name profile created',
+                    ),
+                  ),
                 );
               },
               child: Text(t ? 'সংরক্ষণ করুন' : 'Save'),
@@ -100,7 +127,9 @@ class ParentShell extends StatelessWidget {
             ),
             onPressed: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const NotificationCenterScreen()),
+              MaterialPageRoute(
+                builder: (_) => const NotificationCenterScreen(),
+              ),
             ),
           ),
         ],
@@ -116,14 +145,22 @@ class ParentShell extends StatelessWidget {
                   children: [
                     const CircleAvatar(radius: 24, child: Icon(Icons.person)),
                     const SizedBox(height: 8),
-                    Text(state.parent.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    Text(state.parent.email, style: const TextStyle(color: Colors.grey)),
+                    Text(
+                      state.parent.name,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      state.parent.email,
+                      style: const TextStyle(color: Colors.grey),
+                    ),
                   ],
                 ),
               ),
               ListTile(
                 leading: const Icon(Icons.home_rounded),
-                title: Text(t ? 'শিশুদের স্ক্রিনে ফিরে যান' : 'Back to Kids Screen'),
+                title: Text(
+                  t ? 'শিশুদের স্ক্রিনে ফিরে যান' : 'Back to Kids Screen',
+                ),
                 onTap: () {
                   state.parentMode = false;
                   Navigator.pushReplacementNamed(context, '/profiles');
@@ -157,7 +194,11 @@ class ParentShell extends StatelessWidget {
               ListTile(
                 leading: const Icon(Icons.logout),
                 title: Text(t ? 'লগআউট' : 'Log Out'),
-                onTap: () => Navigator.pushNamedAndRemoveUntil(context, '/', (r) => false),
+                onTap: () => Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/',
+                  (r) => false,
+                ),
               ),
             ],
           ),
@@ -172,7 +213,10 @@ class ParentShell extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
         children: [
-          Text(t ? 'সন্তানদের অগ্রগতি' : "Children's Progress", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Text(
+            t ? 'সন্তানদের অগ্রগতি' : "Children's Progress",
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 12),
           for (final child in state.children) _ChildProgressCard(child: child),
         ],
@@ -185,7 +229,11 @@ class _ChildProgressCard extends StatelessWidget {
   final Child child;
   const _ChildProgressCard({required this.child});
 
-  Future<void> _confirmDelete(BuildContext context, AppState state, bool t) async {
+  Future<void> _confirmDelete(
+    BuildContext context,
+    AppState state,
+    bool t,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -213,7 +261,13 @@ class _ChildProgressCard extends StatelessWidget {
       state.removeChildProfile(child.id);
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(t ? '${child.name} প্রোফাইল মুছে ফেলা হয়েছে' : "${child.name}'s profile deleted")),
+        SnackBar(
+          content: Text(
+            t
+                ? '${child.name} প্রোফাইল মুছে ফেলা হয়েছে'
+                : "${child.name}'s profile deleted",
+          ),
+        ),
       );
     }
   }
@@ -229,8 +283,14 @@ class _ChildProgressCard extends StatelessWidget {
     return Card(
       child: ListTile(
         contentPadding: const EdgeInsets.all(12),
-        leading: CircleAvatar(radius: 24, child: Text(child.avatarEmoji, style: const TextStyle(fontSize: 22))),
-        title: Text(child.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+        leading: CircleAvatar(
+          radius: 24,
+          child: Text(child.avatarEmoji, style: const TextStyle(fontSize: 22)),
+        ),
+        title: Text(
+          child.name,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
         subtitle: Text(
           '${results.length} ${t ? "টি কুইজ" : "quizzes"} • ${badges.length} ${t ? "ব্যাজ" : "badges"} • $remaining ${t ? "মিনিট বাকি" : "min left"}',
         ),
@@ -242,10 +302,15 @@ class _ChildProgressCard extends StatelessWidget {
               tooltip: t ? 'মুছুন' : 'Delete',
               onPressed: () => _confirmDelete(context, state, t),
             ),
-            const Icon(Icons.chevron_right_rounded, color: AppTheme.secondary, size: 28),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppTheme.secondary,
+              size: 28,
+            ),
           ],
         ),
-        onTap: () => Navigator.pushNamed(context, '/child-progress', arguments: child),
+        onTap: () =>
+            Navigator.pushNamed(context, '/child-progress', arguments: child),
       ),
     );
   }

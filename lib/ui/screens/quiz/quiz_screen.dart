@@ -1,10 +1,10 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../models/models.dart';
-import '../../logic/app_state.dart';
-import '../../services/mock_data.dart';
-import '../widgets/floating_bubbles.dart';
+import 'package:safezone_ultra/models/models.dart';
+import 'package:safezone_ultra/logic/app_state.dart';
+import 'package:safezone_ultra/services/mock_data.dart';
+import 'package:safezone_ultra/ui/widgets/floating_bubbles.dart';
 
 const Map<HazardCategory, List<Color>> _categoryBackdrop = {
   HazardCategory.fire: [Color(0xFFFFD59E), Color(0xFFFF9E7A)],

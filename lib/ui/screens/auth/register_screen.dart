@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../logic/app_state.dart';
+import 'package:safezone_ultra/logic/app_state.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -42,12 +42,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Icon(Icons.family_restroom, size: 64, color: Theme.of(context).colorScheme.primary),
+                Icon(
+                  Icons.family_restroom,
+                  size: 64,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   t ? 'নতুন অ্যাকাউন্ট তৈরি করুন' : 'Create a new account',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 24),
                 TextField(
@@ -97,9 +104,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           border: const OutlineInputBorder(),
                         ),
                         items: [
-                          DropdownMenuItem(value: 'Female', child: Text(t ? 'নারী' : 'Female')),
-                          DropdownMenuItem(value: 'Male', child: Text(t ? 'পুরুষ' : 'Male')),
-                          DropdownMenuItem(value: 'Other', child: Text(t ? 'অন্যান্য' : 'Other')),
+                          DropdownMenuItem(
+                            value: 'Female',
+                            child: Text(t ? 'নারী' : 'Female'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Male',
+                            child: Text(t ? 'পুরুষ' : 'Male'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Other',
+                            child: Text(t ? 'অন্যান্য' : 'Other'),
+                          ),
                         ],
                         onChanged: (v) => setState(() => _sex = v ?? _sex),
                       ),
@@ -124,7 +140,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     if (name.isEmpty || age == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text(t ? 'নাম এবং বয়স সঠিকভাবে লিখুন' : 'Enter a valid name and age'),
+                          content: Text(
+                            t
+                                ? 'নাম এবং বয়স সঠিকভাবে লিখুন'
+                                : 'Enter a valid name and age',
+                          ),
                         ),
                       );
                       return;
@@ -134,7 +154,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          t ? '$name প্রোফাইল তৈরি হয়েছে' : '$name profile created',
+                          t
+                              ? '$name প্রোফাইল তৈরি হয়েছে'
+                              : '$name profile created',
                         ),
                       ),
                     );
@@ -145,7 +167,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 12),
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text(t ? 'ইতিমধ্যে অ্যাকাউন্ট আছে? লগইন করুন' : 'Already have an account? Login'),
+                  child: Text(
+                    t
+                        ? 'ইতিমধ্যে অ্যাকাউন্ট আছে? লগইন করুন'
+                        : 'Already have an account? Login',
+                  ),
                 ),
               ],
             ),

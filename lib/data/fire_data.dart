@@ -1,4 +1,4 @@
-import '../models/models.dart';
+import 'package:safezone_ultra/models/models.dart';
 
 final LessonModule fireModule = const LessonModule(
   id: 'm1',
@@ -62,9 +62,31 @@ final LessonModule fireModule = const LessonModule(
     'প্রকৃত জরুরি পরিস্থিতিতে সবসময় ফায়ার সার্ভিসের কথা শুনে তাদের নির্দেশনা মেনে চলতে হবে।',
   ],
   stepIcons: [
-    '🛢️', '🚨', '🧒', '🍳', '🔌', '⚡', '🧯', '🪟',
-    '🕯️', '🚪', '📍', '✋', '🌡️', '💨', '🛗', '🔥',
-    '🏠', '☎️', '💧', '😷', '📣', '🏋️', '🎆', '⛽', '👨‍🚒',
+    '🛢️',
+    '🚨',
+    '🧒',
+    '🍳',
+    '🔌',
+    '⚡',
+    '🧯',
+    '🪟',
+    '🕯️',
+    '🚪',
+    '📍',
+    '✋',
+    '🌡️',
+    '💨',
+    '🛗',
+    '🔥',
+    '🏠',
+    '☎️',
+    '💧',
+    '😷',
+    '📣',
+    '🏋️',
+    '🎆',
+    '⛽',
+    '👨‍🚒',
   ],
   stepImages: [
     'assets/lessons/fire/fire_01.png',
@@ -94,11 +116,31 @@ final LessonModule fireModule = const LessonModule(
     'assets/lessons/fire/fire_25.png',
   ],
   stepVideos: [
-    '', '', '', '', '', '', '', '', '', '', '', '', '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
     'assets/lessons/fire/fire_14.mp4',
     'assets/lessons/fire/fire_15.mp4',
     'assets/lessons/fire/fire_16.mp4',
-    '', '', '', '', '', '', '', '', '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
   ],
 );
 
@@ -112,7 +154,12 @@ final Quiz fireQuiz = const Quiz(
       question: 'What should you do if your clothes catch fire?',
       questionBn: 'তোমার কাপড়ে আগুন লাগলে কী করবে?',
       options: ['Run', 'Stop, Drop and Roll', 'Hide', 'Shout only'],
-      optionsBn: ['দৌড়াবে', 'থামো, শুয়ে পড়ো ও গড়াগড়ি দাও', 'লুকাবে', 'শুধু চিৎকার করবে'],
+      optionsBn: [
+        'দৌড়াবে',
+        'থামো, শুয়ে পড়ো ও গড়াগড়ি দাও',
+        'লুকাবে',
+        'শুধু চিৎকার করবে',
+      ],
       correctIndex: 1,
     ),
     QuizQuestion(
@@ -123,7 +170,8 @@ final Quiz fireQuiz = const Quiz(
       correctIndex: 0,
     ),
     QuizQuestion(
-      question: 'Before opening a closed door during a fire, what should you do?',
+      question:
+          'Before opening a closed door during a fire, what should you do?',
       questionBn: 'আগুনের সময় বন্ধ দরজা খোলার আগে তোমার কী করা উচিত?',
       options: [
         'Kick it open',
@@ -157,8 +205,10 @@ final Quiz fireQuiz = const Quiz(
       correctIndex: 1,
     ),
     QuizQuestion(
-      question: 'Which should you use to leave a burning building — stairs or elevator?',
-      questionBn: 'জ্বলন্ত ভবন থেকে বের হতে সিঁড়ি না লিফট, কোনটা ব্যবহার করবে?',
+      question:
+          'Which should you use to leave a burning building — stairs or elevator?',
+      questionBn:
+          'জ্বলন্ত ভবন থেকে বের হতে সিঁড়ি না লিফট, কোনটা ব্যবহার করবে?',
       options: ['Elevator', 'Stairs', 'Either one', 'Wait inside'],
       optionsBn: ['লিফট', 'সিঁড়ি', 'যেকোনো একটি', 'ভেতরে অপেক্ষা করা'],
       correctIndex: 1,
@@ -184,11 +234,17 @@ final Quiz fireQuiz = const Quiz(
       question: 'Is it safe to hide under a bed during a fire?',
       questionBn: 'আগুনের সময় বিছানার নিচে লুকানো কি নিরাপদ?',
       options: ['Yes, always', 'No, never', 'Only at night', 'Only if scared'],
-      optionsBn: ['হ্যাঁ, সবসময়', 'না, কখনোই না', 'শুধু রাতে', 'শুধু ভয় পেলে'],
+      optionsBn: [
+        'হ্যাঁ, সবসময়',
+        'না, কখনোই না',
+        'শুধু রাতে',
+        'শুধু ভয় পেলে',
+      ],
       correctIndex: 1,
     ),
     QuizQuestion(
-      question: 'What should you put under a door gap if you are trapped in a room?',
+      question:
+          'What should you put under a door gap if you are trapped in a room?',
       questionBn: 'ঘরে আটকা পড়লে দরজার ফাঁকে তোমার কী গুঁজে দেওয়া উচিত?',
       options: ['A cloth', 'A toy', 'A book', 'Nothing'],
       optionsBn: ['একটি কাপড়', 'একটি খেলনা', 'একটি বই', 'কিছুই না'],
@@ -197,15 +253,35 @@ final Quiz fireQuiz = const Quiz(
     QuizQuestion(
       question: 'Should you use water to put out an electrical fire?',
       questionBn: 'বৈদ্যুতিক আগুন নেভাতে পানি ব্যবহার করা উচিত কি?',
-      options: ['Yes, always', 'No, never', 'Only a little', 'Only with a bucket'],
-      optionsBn: ['হ্যাঁ, সবসময়', 'না, কখনোই না', 'শুধু অল্প', 'শুধু বালতি দিয়ে'],
+      options: [
+        'Yes, always',
+        'No, never',
+        'Only a little',
+        'Only with a bucket',
+      ],
+      optionsBn: [
+        'হ্যাঁ, সবসময়',
+        'না, কখনোই না',
+        'শুধু অল্প',
+        'শুধু বালতি দিয়ে',
+      ],
       correctIndex: 1,
     ),
     QuizQuestion(
       question: 'How often should families practice a home fire drill?',
       questionBn: 'পরিবারগুলোর কত ঘন ঘন ফায়ার ড্রিল অনুশীলন করা উচিত?',
-      options: ['Never', 'Once every few years', 'Twice a year', 'Only after a fire'],
-      optionsBn: ['কখনোই না', 'কয়েক বছরে একবার', 'বছরে দুইবার', 'শুধু আগুন লাগার পর'],
+      options: [
+        'Never',
+        'Once every few years',
+        'Twice a year',
+        'Only after a fire',
+      ],
+      optionsBn: [
+        'কখনোই না',
+        'কয়েক বছরে একবার',
+        'বছরে দুইবার',
+        'শুধু আগুন লাগার পর',
+      ],
       correctIndex: 2,
     ),
   ],

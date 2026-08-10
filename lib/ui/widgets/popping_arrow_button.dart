@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
+import 'package:safezone_ultra/ui/theme/app_theme.dart';
 
 /// A round, high-contrast icon button used for navigation arrows that need
 /// to stand out against busy/pastel backgrounds (e.g. a "back to home"

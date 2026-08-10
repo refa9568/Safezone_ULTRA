@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../logic/app_state.dart';
+import 'package:safezone_ultra/logic/app_state.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -35,12 +35,19 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Icon(Icons.family_restroom, size: 64, color: Theme.of(context).colorScheme.primary),
+                Icon(
+                  Icons.family_restroom,
+                  size: 64,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   t ? 'আপনার অ্যাকাউন্টে লগইন করুন' : 'Sign in to your account',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 24),
                 TextField(
@@ -71,7 +78,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 12),
                 TextButton(
                   onPressed: () => Navigator.pushNamed(context, '/register'),
-                  child: Text(t ? 'নতুন অ্যাকাউন্ট? নিবন্ধন করুন' : "New here? Create an account"),
+                  child: Text(
+                    t
+                        ? 'নতুন অ্যাকাউন্ট? নিবন্ধন করুন'
+                        : "New here? Create an account",
+                  ),
                 ),
               ],
             ),

@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'safety_mascot.dart';
+import 'package:safezone_ultra/ui/widgets/safety_mascot.dart';
 
 class CartoonInstructionCard extends StatefulWidget {
   final String emoji;
@@ -37,18 +37,39 @@ class _CartoonInstructionCardState extends State<CartoonInstructionCard>
   @override
   void initState() {
     super.initState();
-    _bounceController = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
-    _bounce = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 0.0, end: -0.18), weight: 1),
-      TweenSequenceItem(tween: Tween(begin: -0.18, end: 0.14), weight: 1),
-      TweenSequenceItem(tween: Tween(begin: 0.14, end: 0.0), weight: 1),
-    ]).animate(CurvedAnimation(parent: _bounceController, curve: Curves.easeInOut));
+    _bounceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _bounce =
+        TweenSequence<double>([
+          TweenSequenceItem(tween: Tween(begin: 0.0, end: -0.18), weight: 1),
+          TweenSequenceItem(tween: Tween(begin: -0.18, end: 0.14), weight: 1),
+          TweenSequenceItem(tween: Tween(begin: 0.14, end: 0.0), weight: 1),
+        ]).animate(
+          CurvedAnimation(parent: _bounceController, curve: Curves.easeInOut),
+        );
 
-    _idleController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400))..repeat(reverse: true);
-    _driftController = AnimationController(vsync: this, duration: const Duration(seconds: 6))..repeat();
-    _cloud1Squash = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
-    _cloud2Squash = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
-    _groundBounce = AnimationController(vsync: this, duration: const Duration(milliseconds: 350));
+    _idleController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    )..repeat(reverse: true);
+    _driftController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 6),
+    )..repeat();
+    _cloud1Squash = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    _cloud2Squash = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    _groundBounce = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 350),
+    );
   }
 
   @override
@@ -164,7 +185,10 @@ class _CartoonInstructionCardState extends State<CartoonInstructionCard>
                   top: poke.cloudIndex == 0 ? 30 : 46,
                   left: poke.cloudIndex == 0 ? 44 : null,
                   right: poke.cloudIndex == 0 ? null : 42,
-                  child: _ParticleBurst(key: ValueKey(poke.id), onDone: () => _removeCloudPoke(poke.id)),
+                  child: _ParticleBurst(
+                    key: ValueKey(poke.id),
+                    onDone: () => _removeCloudPoke(poke.id),
+                  ),
                 ),
               // Twinkling sparkle
               AnimatedBuilder(
@@ -197,7 +221,9 @@ class _CartoonInstructionCardState extends State<CartoonInstructionCard>
                   child: AnimatedBuilder(
                     animation: _groundBounce,
                     builder: (context, child) {
-                      final squash = sin(pi * _groundBounce.value).clamp(0.0, 1.0);
+                      final squash = sin(
+                        pi * _groundBounce.value,
+                      ).clamp(0.0, 1.0);
                       return Transform.scale(
                         scaleY: 1 - squash * 0.12,
                         alignment: Alignment.bottomCenter,
@@ -208,7 +234,9 @@ class _CartoonInstructionCardState extends State<CartoonInstructionCard>
                       height: 54,
                       decoration: BoxDecoration(
                         color: widget.groundColor,
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(30),
+                        ),
                       ),
                     ),
                   ),
@@ -216,7 +244,12 @@ class _CartoonInstructionCardState extends State<CartoonInstructionCard>
               ),
               // Particle bursts
               for (final burst in _bursts)
-                Center(child: _ParticleBurst(key: ValueKey(burst.id), onDone: () => _removeBurst(burst.id))),
+                Center(
+                  child: _ParticleBurst(
+                    key: ValueKey(burst.id),
+                    onDone: () => _removeBurst(burst.id),
+                  ),
+                ),
               // Main interactive icon
               Center(
                 child: GestureDetector(
@@ -227,7 +260,10 @@ class _CartoonInstructionCardState extends State<CartoonInstructionCard>
                       final bob = sin(_idleController.value * pi) * 6;
                       return Transform.translate(
                         offset: Offset(0, -bob),
-                        child: Transform.rotate(angle: _bounce.value, child: child),
+                        child: Transform.rotate(
+                          angle: _bounce.value,
+                          child: child,
+                        ),
                       );
                     },
                     child: SafetyMascot(
@@ -242,7 +278,15 @@ class _CartoonInstructionCardState extends State<CartoonInstructionCard>
                 bottom: 62,
                 right: 0,
                 left: 0,
-                child: Text('👆 Tap me!', textAlign: TextAlign.center, style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w600)),
+                child: Text(
+                  '👆 Tap me!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ],
           ),
@@ -271,7 +315,8 @@ class _ParticleBurst extends StatefulWidget {
   State<_ParticleBurst> createState() => _ParticleBurstState();
 }
 
-class _ParticleBurstState extends State<_ParticleBurst> with SingleTickerProviderStateMixin {
+class _ParticleBurstState extends State<_ParticleBurst>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   final List<String> _emojis = ['⭐', '✨', '🎉', '💫'];
   late final List<double> _angles;
@@ -280,9 +325,14 @@ class _ParticleBurstState extends State<_ParticleBurst> with SingleTickerProvide
   @override
   void initState() {
     super.initState();
-    _angles = List.generate(6, (i) => (i / 6) * 2 * pi + _random.nextDouble() * 0.4);
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 700))
-      ..forward().whenComplete(widget.onDone);
+    _angles = List.generate(
+      6,
+      (i) => (i / 6) * 2 * pi + _random.nextDouble() * 0.4,
+    );
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    )..forward().whenComplete(widget.onDone);
   }
 
   @override
@@ -302,10 +352,16 @@ class _ParticleBurstState extends State<_ParticleBurst> with SingleTickerProvide
           children: [
             for (int i = 0; i < _angles.length; i++)
               Transform.translate(
-                offset: Offset(cos(_angles[i]) * 70 * t, sin(_angles[i]) * 70 * t),
+                offset: Offset(
+                  cos(_angles[i]) * 70 * t,
+                  sin(_angles[i]) * 70 * t,
+                ),
                 child: Opacity(
                   opacity: (1 - t).clamp(0, 1),
-                  child: Text(_emojis[i % _emojis.length], style: const TextStyle(fontSize: 22)),
+                  child: Text(
+                    _emojis[i % _emojis.length],
+                    style: const TextStyle(fontSize: 22),
+                  ),
                 ),
               ),
           ],
@@ -321,6 +377,10 @@ class _Cloud extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Icon(Icons.cloud_rounded, size: size, color: Colors.white.withValues(alpha: 0.85));
+    return Icon(
+      Icons.cloud_rounded,
+      size: size,
+      color: Colors.white.withValues(alpha: 0.85),
+    );
   }
 }

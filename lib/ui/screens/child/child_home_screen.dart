@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../services/mock_data.dart';
-import '../../models/models.dart';
-import '../../logic/app_state.dart';
-import '../theme/app_theme.dart';
-import '../widgets/floating_bubbles.dart';
+import 'package:safezone_ultra/services/mock_data.dart';
+import 'package:safezone_ultra/models/models.dart';
+import 'package:safezone_ultra/logic/app_state.dart';
+import 'package:safezone_ultra/ui/theme/app_theme.dart';
+import 'package:safezone_ultra/ui/widgets/floating_bubbles.dart';
 
 const Map<HazardCategory, List<Color>> _categoryColors = {
   HazardCategory.fire: [Color(0xFFFFCCBC), Color(0xFFFFAB91)],

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../services/mock_data.dart';
-import '../../models/models.dart';
-import '../../logic/app_state.dart';
-import '../theme/app_theme.dart';
-import '../widgets/popping_arrow_button.dart';
+import 'package:safezone_ultra/services/mock_data.dart';
+import 'package:safezone_ultra/models/models.dart';
+import 'package:safezone_ultra/logic/app_state.dart';
+import 'package:safezone_ultra/ui/theme/app_theme.dart';
+import 'package:safezone_ultra/ui/widgets/popping_arrow_button.dart';
 
 class LessonListScreen extends StatelessWidget {
   final bool embedded;
@@ -42,12 +42,26 @@ class LessonListScreen extends StatelessWidget {
               contentPadding: const EdgeInsets.all(12),
               leading: CircleAvatar(
                 radius: 26,
-                child: Text(_emoji(module.category), style: const TextStyle(fontSize: 24)),
+                child: Text(
+                  _emoji(module.category),
+                  style: const TextStyle(fontSize: 24),
+                ),
               ),
-              title: Text(t ? module.titleBn : module.title, style: const TextStyle(fontWeight: FontWeight.w600)),
+              title: Text(
+                t ? module.titleBn : module.title,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
               subtitle: Text(t ? module.summaryBn : module.summary),
-              trailing: const Icon(Icons.chevron_right_rounded, color: AppTheme.secondary, size: 28),
-              onTap: () => Navigator.pushNamed(context, '/lesson-player', arguments: module),
+              trailing: const Icon(
+                Icons.chevron_right_rounded,
+                color: AppTheme.secondary,
+                size: 28,
+              ),
+              onTap: () => Navigator.pushNamed(
+                context,
+                '/lesson-player',
+                arguments: module,
+              ),
             ),
           );
         },

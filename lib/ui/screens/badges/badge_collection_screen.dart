@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../services/mock_data.dart';
-import '../../logic/app_state.dart';
-import '../widgets/floating_bubbles.dart';
+import 'package:safezone_ultra/services/mock_data.dart';
+import 'package:safezone_ultra/logic/app_state.dart';
+import 'package:safezone_ultra/ui/widgets/floating_bubbles.dart';
 
 class BadgeCollectionScreen extends StatelessWidget {
   const BadgeCollectionScreen({super.key});

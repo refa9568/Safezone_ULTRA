@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../logic/app_state.dart';
+import 'package:safezone_ultra/logic/app_state.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
-  Future<void> _editEmergencyPhone(BuildContext context, AppState state, bool t) async {
+  Future<void> _editEmergencyPhone(
+    BuildContext context,
+    AppState state,
+    bool t,
+  ) async {
     final controller = TextEditingController(text: state.parent.emergencyPhone);
     final result = await showDialog<String>(
       context: context,
@@ -26,7 +30,8 @@ class SettingsScreen extends StatelessWidget {
             child: Text(t ? 'বাতিল' : 'Cancel'),
           ),
           ElevatedButton(
-            onPressed: () => Navigator.pop(dialogContext, controller.text.trim()),
+            onPressed: () =>
+                Navigator.pop(dialogContext, controller.text.trim()),
             child: Text(t ? 'সংরক্ষণ করুন' : 'Save'),
           ),
         ],
@@ -37,7 +42,11 @@ class SettingsScreen extends StatelessWidget {
     }
   }
 
-  Future<void> _editParentPin(BuildContext context, AppState state, bool t) async {
+  Future<void> _editParentPin(
+    BuildContext context,
+    AppState state,
+    bool t,
+  ) async {
     final controller = TextEditingController(text: state.parent.parentPin);
     final result = await showDialog<String>(
       context: context,
@@ -48,9 +57,7 @@ class SettingsScreen extends StatelessWidget {
           controller: controller,
           keyboardType: TextInputType.number,
           maxLength: 6,
-          decoration: InputDecoration(
-            labelText: t ? 'নতুন পিন' : 'New PIN',
-          ),
+          decoration: InputDecoration(labelText: t ? 'নতুন পিন' : 'New PIN'),
         ),
         actions: [
           TextButton(
@@ -58,7 +65,8 @@ class SettingsScreen extends StatelessWidget {
             child: Text(t ? 'বাতিল' : 'Cancel'),
           ),
           ElevatedButton(
-            onPressed: () => Navigator.pop(dialogContext, controller.text.trim()),
+            onPressed: () =>
+                Navigator.pop(dialogContext, controller.text.trim()),
             child: Text(t ? 'সংরক্ষণ করুন' : 'Save'),
           ),
         ],
@@ -80,7 +88,9 @@ class SettingsScreen extends StatelessWidget {
         children: [
           SwitchListTile(
             title: Text(t ? 'বাংলা ভাষা' : 'Bengali Language'),
-            subtitle: Text(t ? 'পুরো অ্যাপে বাংলা দেখান' : 'Show the app in Bengali'),
+            subtitle: Text(
+              t ? 'পুরো অ্যাপে বাংলা দেখান' : 'Show the app in Bengali',
+            ),
             value: state.bengali,
             onChanged: (_) => state.toggleLanguage(),
           ),
@@ -93,13 +103,19 @@ class SettingsScreen extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.lock_outline),
             title: Text(t ? 'অভিভাবক পিন' : 'Parent PIN'),
-            subtitle: Text(t ? 'ড্যাশবোর্ডে প্রবেশের পিন পরিবর্তন করুন' : 'Change the PIN required to enter this dashboard'),
+            subtitle: Text(
+              t
+                  ? 'ড্যাশবোর্ডে প্রবেশের পিন পরিবর্তন করুন'
+                  : 'Change the PIN required to enter this dashboard',
+            ),
             trailing: const Icon(Icons.edit_outlined),
             onTap: () => _editParentPin(context, state, t),
           ),
           ListTile(
             leading: const Icon(Icons.sos_rounded, color: Colors.red),
-            title: Text(t ? 'জরুরি ফোন নম্বর (SOS)' : 'Emergency Phone Number (SOS)'),
+            title: Text(
+              t ? 'জরুরি ফোন নম্বর (SOS)' : 'Emergency Phone Number (SOS)',
+            ),
             subtitle: Text(
               state.parent.emergencyPhone.isEmpty
                   ? (t ? 'সেট করা হয়নি' : 'Not set')
@@ -111,7 +127,9 @@ class SettingsScreen extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.notifications_outlined),
             title: Text(t ? 'বিজ্ঞপ্তি পছন্দ' : 'Notification Preferences'),
-            subtitle: Text(t ? 'অ্যাপ চালু হলে সতর্ক করুন' : 'Alert on app launch'),
+            subtitle: Text(
+              t ? 'অ্যাপ চালু হলে সতর্ক করুন' : 'Alert on app launch',
+            ),
           ),
           ListTile(
             leading: const Icon(Icons.info_outline),

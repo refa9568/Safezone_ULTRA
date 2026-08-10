@@ -2,11 +2,20 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../logic/app_state.dart';
-import '../theme/app_theme.dart';
-import '../widgets/floating_bubbles.dart';
+import 'package:safezone_ultra/logic/app_state.dart';
+import 'package:safezone_ultra/ui/theme/app_theme.dart';
+import 'package:safezone_ultra/ui/widgets/floating_bubbles.dart';
 
-const List<String> _pairSymbols = ['🔥', '🌊', '🌍', '🚸', '🧯', '🚨', '🛡️', '⛑️'];
+const List<String> _pairSymbols = [
+  '🔥',
+  '🌊',
+  '🌍',
+  '🚸',
+  '🧯',
+  '🚨',
+  '🛡️',
+  '⛑️',
+];
 const Duration _peekDuration = Duration(seconds: 4);
 
 class MindGameScreen extends StatefulWidget {
@@ -140,7 +149,9 @@ class _MindGameScreenState extends State<MindGameScreen> {
             const Text('🎉', style: TextStyle(fontSize: 56)),
             const SizedBox(height: 12),
             Text(
-              t ? 'দারুণ! তুমি সব মিলিয়েছ!' : 'Great job! You matched them all!',
+              t
+                  ? 'দারুণ! তুমি সব মিলিয়েছ!'
+                  : 'Great job! You matched them all!',
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
@@ -154,7 +165,11 @@ class _MindGameScreenState extends State<MindGameScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(
                 _stars,
-                (_) => const Icon(Icons.star_rounded, color: Colors.amber, size: 32),
+                (_) => const Icon(
+                  Icons.star_rounded,
+                  color: Colors.amber,
+                  size: 32,
+                ),
               ),
             ),
             if (newBadge) ...[
@@ -217,7 +232,10 @@ class _MindGameScreenState extends State<MindGameScreen> {
       body: Stack(
         children: [
           const Positioned.fill(
-            child: FloatingBubbles(count: 8, emojis: ['🧠', '✨', '⭐', '🎈', '🌟']),
+            child: FloatingBubbles(
+              count: 8,
+              emojis: ['🧠', '✨', '⭐', '🎈', '🌟'],
+            ),
           ),
           Column(
             children: [
@@ -227,10 +245,13 @@ class _MindGameScreenState extends State<MindGameScreen> {
                   _peeking
                       ? (t ? 'ছবিগুলো মনে রাখো!' : 'Memorize the pictures!')
                       : (t
-                          ? 'একই ছবির জোড়া খুঁজে বের করো!'
-                          : 'Find the matching picture pairs!'),
+                            ? 'একই ছবির জোড়া খুঁজে বের করো!'
+                            : 'Find the matching picture pairs!'),
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               Padding(
@@ -243,15 +264,19 @@ class _MindGameScreenState extends State<MindGameScreen> {
               Expanded(
                 child: Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 480, maxHeight: 640),
+                    constraints: const BoxConstraints(
+                      maxWidth: 480,
+                      maxHeight: 640,
+                    ),
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: GridView.builder(
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 4,
-                          crossAxisSpacing: 10,
-                          mainAxisSpacing: 10,
-                        ),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 4,
+                              crossAxisSpacing: 10,
+                              mainAxisSpacing: 10,
+                            ),
                         itemCount: _symbols.length,
                         itemBuilder: (context, index) => _MemoryCard(
                           faceUp: _revealed[index],
@@ -308,8 +333,8 @@ class _MemoryCard extends StatelessWidget {
               end: Alignment.bottomRight,
               colors: faceUp
                   ? (matched
-                      ? [const Color(0xFFC8E6C9), const Color(0xFFA5D6A7)]
-                      : [const Color(0xFFE1BEE7), const Color(0xFFCE93D8)])
+                        ? [const Color(0xFFC8E6C9), const Color(0xFFA5D6A7)]
+                        : [const Color(0xFFE1BEE7), const Color(0xFFCE93D8)])
                   : [AppTheme.primary, const Color(0xFF1E5FA8)],
             ),
             boxShadow: [

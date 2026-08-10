@@ -1,4 +1,4 @@
-import '../models/models.dart';
+import 'package:safezone_ultra/models/models.dart';
 
 final LessonModule floodModule = const LessonModule(
   id: 'm2',
@@ -62,9 +62,31 @@ final LessonModule floodModule = const LessonModule(
     'পরিবারকে নিয়মিত বন্যা থেকে সরে যাওয়ার পরিকল্পনা অনুশীলন করা উচিত যাতে সবাই করণীয় জানে।',
   ],
   stepIcons: [
-    '🗺️', '📻', '🎒', '📄', '⚠️', '📦', '🔌', '🌊',
-    '🚶', '💦', '🚗', '⛰️', '🤢', '⚡', '🌧️', '🏠',
-    '🪟', '👨‍👩‍👧', '💧', '🔧', '🐍', '🏚️', '📞', '☎️', '🔁',
+    '🗺️',
+    '📻',
+    '🎒',
+    '📄',
+    '⚠️',
+    '📦',
+    '🔌',
+    '🌊',
+    '🚶',
+    '💦',
+    '🚗',
+    '⛰️',
+    '🤢',
+    '⚡',
+    '🌧️',
+    '🏠',
+    '🪟',
+    '👨‍👩‍👧',
+    '💧',
+    '🔧',
+    '🐍',
+    '🏚️',
+    '📞',
+    '☎️',
+    '🔁',
   ],
   stepImages: [
     'assets/lessons/flood/flood_01.png',
@@ -111,22 +133,53 @@ final Quiz floodQuiz = const Quiz(
     QuizQuestion(
       question: 'Is it safe to walk through moving flood water?',
       questionBn: 'দ্রুতগতির বন্যার পানির মধ্য দিয়ে হাঁটা কি নিরাপদ?',
-      options: ['Yes, always', 'No, never', 'Only if shallow', 'Only with shoes'],
-      optionsBn: ['হ্যাঁ, সবসময়', 'না, কখনোই না', 'শুধু অগভীর হলে', 'শুধু জুতা পরলে'],
+      options: [
+        'Yes, always',
+        'No, never',
+        'Only if shallow',
+        'Only with shoes',
+      ],
+      optionsBn: [
+        'হ্যাঁ, সবসময়',
+        'না, কখনোই না',
+        'শুধু অগভীর হলে',
+        'শুধু জুতা পরলে',
+      ],
       correctIndex: 1,
     ),
     QuizQuestion(
       question: 'What should you do if you see a flooded road while driving?',
-      questionBn: 'গাড়ি চালানোর সময় বন্যা কবলিত রাস্তা দেখলে তোমার কী করা উচিত?',
-      options: ['Drive through fast', 'Turn around', 'Drive slowly through', 'Stop and wait inside'],
-      optionsBn: ['দ্রুত পার হও', 'ফিরে যাও', 'ধীরে ধীরে পার হও', 'থেমে ভেতরে অপেক্ষা করো'],
+      questionBn:
+          'গাড়ি চালানোর সময় বন্যা কবলিত রাস্তা দেখলে তোমার কী করা উচিত?',
+      options: [
+        'Drive through fast',
+        'Turn around',
+        'Drive slowly through',
+        'Stop and wait inside',
+      ],
+      optionsBn: [
+        'দ্রুত পার হও',
+        'ফিরে যাও',
+        'ধীরে ধীরে পার হও',
+        'থেমে ভেতরে অপেক্ষা করো',
+      ],
       correctIndex: 1,
     ),
     QuizQuestion(
       question: 'What should you do with electricity and gas before a flood?',
       questionBn: 'বন্যার আগে বিদ্যুৎ ও গ্যাসের ক্ষেত্রে তোমার কী করা উচিত?',
-      options: ['Leave them on', 'Turn them off at the main switch', 'Ignore them', 'Use more appliances'],
-      optionsBn: ['চালু রাখা', 'মূল সুইচ থেকে বন্ধ করা', 'উপেক্ষা করা', 'বেশি যন্ত্র ব্যবহার করা'],
+      options: [
+        'Leave them on',
+        'Turn them off at the main switch',
+        'Ignore them',
+        'Use more appliances',
+      ],
+      optionsBn: [
+        'চালু রাখা',
+        'মূল সুইচ থেকে বন্ধ করা',
+        'উপেক্ষা করা',
+        'বেশি যন্ত্র ব্যবহার করা',
+      ],
       correctIndex: 1,
     ),
     QuizQuestion(
@@ -149,19 +202,40 @@ final Quiz floodQuiz = const Quiz(
     QuizQuestion(
       question: 'If trapped in a building during a flood, where should you go?',
       questionBn: 'বন্যার সময় কোনো ভবনে আটকা পড়লে তোমার কোথায় যাওয়া উচিত?',
-      options: ['Basement', 'Highest level, not a closed attic', 'Ground floor', 'Outside in the water'],
-      optionsBn: ['বেসমেন্ট', 'সবচেয়ে উঁচু তলা, বন্ধ চিলেকোঠা নয়', 'নিচতলা', 'পানিতে বাইরে'],
+      options: [
+        'Basement',
+        'Highest level, not a closed attic',
+        'Ground floor',
+        'Outside in the water',
+      ],
+      optionsBn: [
+        'বেসমেন্ট',
+        'সবচেয়ে উঁচু তলা, বন্ধ চিলেকোঠা নয়',
+        'নিচতলা',
+        'পানিতে বাইরে',
+      ],
       correctIndex: 1,
     ),
     QuizQuestion(
       question: 'Should you drink flood-affected water without treating it?',
       questionBn: 'বন্যা-প্রভাবিত পানি বিশুদ্ধ না করে পান করা উচিত কি?',
-      options: ['Yes', 'No, boil or purify it first', 'Only if clear', 'Only a little'],
-      optionsBn: ['হ্যাঁ', 'না, আগে ফুটিয়ে বা পরিশোধন করতে হবে', 'শুধু পরিষ্কার হলে', 'শুধু অল্প'],
+      options: [
+        'Yes',
+        'No, boil or purify it first',
+        'Only if clear',
+        'Only a little',
+      ],
+      optionsBn: [
+        'হ্যাঁ',
+        'না, আগে ফুটিয়ে বা পরিশোধন করতে হবে',
+        'শুধু পরিষ্কার হলে',
+        'শুধু অল্প',
+      ],
       correctIndex: 1,
     ),
     QuizQuestion(
-      question: 'What might be hiding in flood water that you should watch for?',
+      question:
+          'What might be hiding in flood water that you should watch for?',
       questionBn: 'বন্যার পানিতে কী থাকতে পারে যা নিয়ে সতর্ক থাকা উচিত?',
       options: ['Snakes and insects', 'Toys', 'Flowers', 'Nothing'],
       optionsBn: ['সাপ ও পোকামাকড়', 'খেলনা', 'ফুল', 'কিছুই না'],
@@ -169,15 +243,31 @@ final Quiz floodQuiz = const Quiz(
     ),
     QuizQuestion(
       question: 'What should every family have ready outside the flood zone?',
-      questionBn: 'প্রতিটি পরিবারের বন্যা কবলিত এলাকার বাইরে কী প্রস্তুত রাখা উচিত?',
-      options: ['Nothing special', 'A meeting point and contact list', 'More furniture', 'A bigger house'],
-      optionsBn: ['বিশেষ কিছু না', 'একটি মিলনস্থল ও যোগাযোগ তালিকা', 'আরো আসবাবপত্র', 'বড় বাড়ি'],
+      questionBn:
+          'প্রতিটি পরিবারের বন্যা কবলিত এলাকার বাইরে কী প্রস্তুত রাখা উচিত?',
+      options: [
+        'Nothing special',
+        'A meeting point and contact list',
+        'More furniture',
+        'A bigger house',
+      ],
+      optionsBn: [
+        'বিশেষ কিছু না',
+        'একটি মিলনস্থল ও যোগাযোগ তালিকা',
+        'আরো আসবাবপত্র',
+        'বড় বাড়ি',
+      ],
       correctIndex: 1,
     ),
     QuizQuestion(
       question: 'How much moving water can sweep away a car?',
       questionBn: 'কতটুকু দ্রুতগতির পানি একটি গাড়িকে ভাসিয়ে নিতে পারে?',
-      options: ['One foot', 'Ten feet', 'It never happens', 'Only a flood wave'],
+      options: [
+        'One foot',
+        'Ten feet',
+        'It never happens',
+        'Only a flood wave',
+      ],
       optionsBn: ['এক ফুট', 'দশ ফুট', 'এটা কখনো হয় না', 'শুধু বন্যার ঢেউ'],
       correctIndex: 0,
     ),

@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
-import '../../services/mock_data.dart';
-import '../../models/models.dart';
-import '../../logic/app_state.dart';
-import '../theme/app_theme.dart';
-import '../widgets/cartoon_instruction_card.dart';
-import '../widgets/floating_bubbles.dart';
+import 'package:safezone_ultra/services/mock_data.dart';
+import 'package:safezone_ultra/models/models.dart';
+import 'package:safezone_ultra/logic/app_state.dart';
+import 'package:safezone_ultra/ui/theme/app_theme.dart';
+import 'package:safezone_ultra/ui/widgets/cartoon_instruction_card.dart';
+import 'package:safezone_ultra/ui/widgets/floating_bubbles.dart';
 
 const Map<HazardCategory, List<Color>> _skyColors = {
   HazardCategory.fire: [Color(0xFFFFD59E), Color(0xFFFF9E7A)],

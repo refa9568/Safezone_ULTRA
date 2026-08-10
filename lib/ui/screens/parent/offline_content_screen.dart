@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../services/mock_data.dart';
-import '../../logic/app_state.dart';
+import 'package:safezone_ultra/services/mock_data.dart';
+import 'package:safezone_ultra/logic/app_state.dart';
 
 class OfflineContentScreen extends StatefulWidget {
   const OfflineContentScreen({super.key});
@@ -19,7 +19,9 @@ class _OfflineContentScreenState extends State<OfflineContentScreen> {
     final t = state.bengali;
 
     return Scaffold(
-      appBar: AppBar(title: Text(t ? 'অফলাইন কনটেন্ট' : 'Offline Content Manager')),
+      appBar: AppBar(
+        title: Text(t ? 'অফলাইন কনটেন্ট' : 'Offline Content Manager'),
+      ),
       body: ListView(
         children: [
           for (final module in MockData.modules)
@@ -33,7 +35,9 @@ class _OfflineContentScreenState extends State<OfflineContentScreen> {
               ),
               trailing: IconButton(
                 icon: Icon(
-                  _downloaded.contains(module.id) ? Icons.delete_outline : Icons.download_rounded,
+                  _downloaded.contains(module.id)
+                      ? Icons.delete_outline
+                      : Icons.download_rounded,
                 ),
                 onPressed: () => setState(() {
                   if (_downloaded.contains(module.id)) {
