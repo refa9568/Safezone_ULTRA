@@ -25,7 +25,9 @@ class _ChildShellState extends State<ChildShell> {
     _usageTimer = Timer.periodic(const Duration(minutes: 1), (_) {
       final state = context.read<AppState>();
       final child = state.activeChild;
-      if (child != null && !state.isLocked(child)) {
+      if (child == null) return;
+      state.refreshDailyReset(child);
+      if (!state.isLocked(child)) {
         state.addUsageMinutes(child, 1);
       }
     });

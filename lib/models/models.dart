@@ -41,6 +41,10 @@ class Child {
   String language; // 'en' or 'bn'
   int usedMinutesToday;
   int screenTimeLimitMinutes;
+  String lastUsageDate; // 'yyyy-MM-dd', local to the device
+  bool scheduleEnabled;
+  int scheduleStartMinutes; // minutes since midnight, e.g. 17:00 = 1020
+  int scheduleEndMinutes;
 
   Child({
     required this.id,
@@ -52,6 +56,10 @@ class Child {
     this.language = 'en',
     this.usedMinutesToday = 0,
     this.screenTimeLimitMinutes = 60,
+    this.lastUsageDate = '',
+    this.scheduleEnabled = false,
+    this.scheduleStartMinutes = 0,
+    this.scheduleEndMinutes = 1439,
   });
 }
 

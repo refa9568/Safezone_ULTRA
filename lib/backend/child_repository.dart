@@ -16,6 +16,10 @@ class ChildRepository extends FirestoreRepository<Child> {
     language: data['language'] as String? ?? 'en',
     usedMinutesToday: data['usedMinutesToday'] as int? ?? 0,
     screenTimeLimitMinutes: data['screenTimeLimitMinutes'] as int? ?? 60,
+    lastUsageDate: data['lastUsageDate'] as String? ?? '',
+    scheduleEnabled: data['scheduleEnabled'] as bool? ?? false,
+    scheduleStartMinutes: data['scheduleStartMinutes'] as int? ?? 0,
+    scheduleEndMinutes: data['scheduleEndMinutes'] as int? ?? 1439,
   );
 
   @override
@@ -28,6 +32,10 @@ class ChildRepository extends FirestoreRepository<Child> {
     'language': item.language,
     'usedMinutesToday': item.usedMinutesToday,
     'screenTimeLimitMinutes': item.screenTimeLimitMinutes,
+    'lastUsageDate': item.lastUsageDate,
+    'scheduleEnabled': item.scheduleEnabled,
+    'scheduleStartMinutes': item.scheduleStartMinutes,
+    'scheduleEndMinutes': item.scheduleEndMinutes,
   };
 
   /// All children belonging to one parent.

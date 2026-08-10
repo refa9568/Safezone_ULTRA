@@ -4,6 +4,14 @@ import 'package:safezone_ultra/logic/app_state.dart';
 import 'package:safezone_ultra/models/models.dart';
 import 'package:safezone_ultra/ui/widgets/child_avatar.dart';
 
+String _formatMinutes(int minutes) {
+  final h = minutes ~/ 60;
+  final m = minutes % 60;
+  final period = h < 12 ? 'AM' : 'PM';
+  final h12 = h % 12 == 0 ? 12 : h % 12;
+  return '$h12:${m.toString().padLeft(2, '0')} $period';
+}
+
 class ScreenTimeSettingsScreen extends StatelessWidget {
   const ScreenTimeSettingsScreen({super.key});
 
@@ -27,8 +35,8 @@ class ScreenTimeSettingsScreen extends StatelessWidget {
               children: [
                 Text(
                   t
-                      ? 'প্রতিটি সন্তানের জন্য প্রতিদিনের সর্বোচ্চ ব্যবহারের সময় সেট করুন'
-                      : "Set each child's daily maximum usage limit",
+                      ? 'প্রতিটি সন্তানের জন্য প্রতিদিনের সময়সীমা ও ব্যবহারের সময়সূচি সেট করুন'
+                      : "Set each child's daily time limit and allowed schedule",
                   style: const TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 16),
@@ -43,6 +51,28 @@ class ScreenTimeSettingsScreen extends StatelessWidget {
 class _ChildScreenTimeCard extends StatelessWidget {
   final Child child;
   const _ChildScreenTimeCard({required this.child});
+
+  Future<void> _pickTime(
+    BuildContext context,
+    AppState state,
+    bool isStart,
+  ) async {
+    final initial = isStart
+        ? child.scheduleStartMinutes
+        : child.scheduleEndMinutes;
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: initial ~/ 60, minute: initial % 60),
+    );
+    if (picked == null) return;
+    final minutes = picked.hour * 60 + picked.minute;
+    state.setScheduleForChild(
+      child,
+      enabled: child.scheduleEnabled,
+      startMinutes: isStart ? minutes : child.scheduleStartMinutes,
+      endMinutes: isStart ? child.scheduleEndMinutes : minutes,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,6 +140,50 @@ class _ChildScreenTimeCard extends StatelessWidget {
               '${child.usedMinutesToday} / $limit ${t ? "মিনিট ব্যবহৃত" : "min used today"}',
               style: const TextStyle(color: Colors.grey),
             ),
+            const Divider(height: 28),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(
+                t
+                    ? 'নির্দিষ্ট সময়সূচি চালু করুন'
+                    : 'Restrict to a time window',
+              ),
+              subtitle: Text(
+                t
+                    ? 'এই সময়ের বাইরে অ্যাপ ব্যবহার করা যাবে না'
+                    : "App can't be used outside this window",
+                style: const TextStyle(fontSize: 12),
+              ),
+              value: child.scheduleEnabled,
+              onChanged: (enabled) => state.setScheduleForChild(
+                child,
+                enabled: enabled,
+                startMinutes: child.scheduleStartMinutes,
+                endMinutes: child.scheduleEndMinutes,
+              ),
+            ),
+            if (child.scheduleEnabled)
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => _pickTime(context, state, true),
+                      child: Text(
+                        '${t ? "শুরু" : "Start"}: ${_formatMinutes(child.scheduleStartMinutes)}',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => _pickTime(context, state, false),
+                      child: Text(
+                        '${t ? "শেষ" : "End"}: ${_formatMinutes(child.scheduleEndMinutes)}',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
           ],
         ),
       ),

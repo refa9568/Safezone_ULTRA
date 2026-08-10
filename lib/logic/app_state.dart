@@ -162,6 +162,10 @@ class AppState extends ChangeNotifier {
             language: child.language,
             usedMinutesToday: child.usedMinutesToday,
             screenTimeLimitMinutes: child.screenTimeLimitMinutes,
+            lastUsageDate: child.lastUsageDate,
+            scheduleEnabled: child.scheduleEnabled,
+            scheduleStartMinutes: child.scheduleStartMinutes,
+            scheduleEndMinutes: child.scheduleEndMinutes,
           );
           notifyListeners();
         })
@@ -217,6 +221,7 @@ class AppState extends ChangeNotifier {
   }
 
   void selectChild(Child child) {
+    _resetIfNewDay(child);
     activeChild = child;
     parentMode = false;
     _pushLaunchNotification(child);
@@ -265,14 +270,60 @@ class AppState extends ChangeNotifier {
         .catchError((_) {});
   }
 
+  String _today() => DateTime.now().toIso8601String().substring(0, 10);
+
+  /// Rolls a child's usage back to zero the first time they're seen on a
+  /// new calendar day.
+  void _resetIfNewDay(Child child) {
+    final today = _today();
+    if (child.lastUsageDate == today) return;
+    child.lastUsageDate = today;
+    child.usedMinutesToday = 0;
+    _childRepo
+        .updateFields(child.id, {'lastUsageDate': today, 'usedMinutesToday': 0})
+        .catchError((_) {});
+  }
+
   int minutesRemaining(Child child) {
     final remaining = child.screenTimeLimitMinutes - child.usedMinutesToday;
     return remaining < 0 ? 0 : remaining;
   }
 
-  bool isLocked(Child child) => minutesRemaining(child) <= 0;
+  /// Whether now falls inside the child's allowed schedule window. Always
+  /// true if no schedule is set. Handles overnight windows (e.g. 21:00-06:00).
+  bool isWithinSchedule(Child child) {
+    if (!child.scheduleEnabled) return true;
+    final now = DateTime.now();
+    final nowMinutes = now.hour * 60 + now.minute;
+    final start = child.scheduleStartMinutes;
+    final end = child.scheduleEndMinutes;
+    if (start <= end) {
+      return nowMinutes >= start && nowMinutes <= end;
+    }
+    return nowMinutes >= start || nowMinutes <= end;
+  }
+
+  bool isLocked(Child child) =>
+      minutesRemaining(child) <= 0 || !isWithinSchedule(child);
+
+  /// 'schedule' if locked out because of the allowed-hours window, 'limit'
+  /// if the daily minute limit is used up, or '' if not locked.
+  String lockReason(Child child) {
+    if (!isWithinSchedule(child)) return 'schedule';
+    if (minutesRemaining(child) <= 0) return 'limit';
+    return '';
+  }
+
+  /// Call periodically (e.g. from a screen-time timer) so a child who's
+  /// sitting on the locked screen still gets unlocked right at midnight
+  /// instead of only on their next app restart or profile switch.
+  void refreshDailyReset(Child child) {
+    _resetIfNewDay(child);
+    notifyListeners();
+  }
 
   void addUsageMinutes(Child child, int minutes) {
+    _resetIfNewDay(child);
     child.usedMinutesToday += minutes;
     notifyListeners();
     _childRepo
@@ -284,6 +335,25 @@ class AppState extends ChangeNotifier {
         message: '${child.name} has reached the daily screen time limit.',
       );
     }
+  }
+
+  void setScheduleForChild(
+    Child child, {
+    required bool enabled,
+    required int startMinutes,
+    required int endMinutes,
+  }) {
+    child.scheduleEnabled = enabled;
+    child.scheduleStartMinutes = startMinutes;
+    child.scheduleEndMinutes = endMinutes;
+    notifyListeners();
+    _childRepo
+        .updateFields(child.id, {
+          'scheduleEnabled': enabled,
+          'scheduleStartMinutes': startMinutes,
+          'scheduleEndMinutes': endMinutes,
+        })
+        .catchError((_) {});
   }
 
   void updateChildPhoto(Child child, String? photoBase64) {
