@@ -83,6 +83,41 @@ class LessonModule {
     this.stepImages = const [],
     this.stepVideos = const [],
   });
+
+  Map<String, dynamic> toMap() => {
+    'title': title,
+    'titleBn': titleBn,
+    'category': category.name,
+    'summary': summary,
+    'summaryBn': summaryBn,
+    'scenario': scenario,
+    'scenarioBn': scenarioBn,
+    'steps': steps,
+    'stepsBn': stepsBn,
+    'stepIcons': stepIcons,
+    'stepImages': stepImages,
+    'stepVideos': stepVideos,
+  };
+
+  factory LessonModule.fromMap(Map<String, dynamic> data, String id) {
+    List<String> strList(String key) =>
+        (data[key] as List?)?.map((e) => e.toString()).toList() ?? const [];
+    return LessonModule(
+      id: id,
+      title: data['title'] as String,
+      titleBn: data['titleBn'] as String,
+      category: HazardCategory.values.byName(data['category'] as String),
+      summary: data['summary'] as String,
+      summaryBn: data['summaryBn'] as String,
+      scenario: data['scenario'] as String? ?? '',
+      scenarioBn: data['scenarioBn'] as String? ?? '',
+      steps: strList('steps'),
+      stepsBn: strList('stepsBn'),
+      stepIcons: strList('stepIcons'),
+      stepImages: strList('stepImages'),
+      stepVideos: strList('stepVideos'),
+    );
+  }
 }
 
 class QuizQuestion {
@@ -99,6 +134,22 @@ class QuizQuestion {
     required this.optionsBn,
     required this.correctIndex,
   });
+
+  Map<String, dynamic> toMap() => {
+    'question': question,
+    'questionBn': questionBn,
+    'options': options,
+    'optionsBn': optionsBn,
+    'correctIndex': correctIndex,
+  };
+
+  factory QuizQuestion.fromMap(Map<String, dynamic> data) => QuizQuestion(
+    question: data['question'] as String,
+    questionBn: data['questionBn'] as String,
+    options: (data['options'] as List).map((e) => e.toString()).toList(),
+    optionsBn: (data['optionsBn'] as List).map((e) => e.toString()).toList(),
+    correctIndex: data['correctIndex'] as int,
+  );
 }
 
 class Quiz {
@@ -115,6 +166,23 @@ class Quiz {
     required this.difficulty,
     required this.questions,
   });
+
+  Map<String, dynamic> toMap() => {
+    'moduleId': moduleId,
+    'title': title,
+    'difficulty': difficulty,
+    'questions': questions.map((q) => q.toMap()).toList(),
+  };
+
+  factory Quiz.fromMap(Map<String, dynamic> data, String id) => Quiz(
+    id: id,
+    moduleId: data['moduleId'] as String,
+    title: data['title'] as String,
+    difficulty: data['difficulty'] as String,
+    questions: (data['questions'] as List)
+        .map((q) => QuizQuestion.fromMap(Map<String, dynamic>.from(q as Map)))
+        .toList(),
+  );
 }
 
 class QuizResult {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:safezone_ultra/firebase_options.dart';
+import 'package:safezone_ultra/backend/content_seeder.dart';
 import 'package:safezone_ultra/logic/app_state.dart';
 import 'package:safezone_ultra/ui/theme/app_theme.dart';
 import 'package:safezone_ultra/ui/screens/auth/splash_screen.dart';
@@ -24,6 +25,7 @@ import 'package:safezone_ultra/ui/screens/games/maze_game_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await ContentSeeder().seedAndLoad();
   runApp(const SafeZoneUltraApp());
 }
 

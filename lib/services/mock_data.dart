@@ -5,14 +5,17 @@ import 'package:safezone_ultra/data/flood_data.dart';
 import 'package:safezone_ultra/data/stranger_data.dart';
 
 class MockData {
-  static final List<LessonModule> modules = [
+  /// Default/seed content, also used as an offline fallback. Once
+  /// [ContentSeeder] has synced with Firestore, these are overwritten with
+  /// the data actually stored there — see lib/backend/content_seeder.dart.
+  static List<LessonModule> modules = [
     fireModule,
     floodModule,
     earthquakeModule,
     strangerModule,
   ];
 
-  static final Map<String, Quiz> quizzesByModule = {
+  static Map<String, Quiz> quizzesByModule = {
     fireModule.id: fireQuiz,
     floodModule.id: floodQuiz,
     earthquakeModule.id: earthquakeQuiz,
