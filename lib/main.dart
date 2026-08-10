@@ -18,7 +18,6 @@ import 'package:safezone_ultra/ui/screens/parent/parent_shell.dart';
 import 'package:safezone_ultra/ui/screens/parent/child_progress_detail_screen.dart';
 import 'package:safezone_ultra/ui/screens/parent/screen_time_settings_screen.dart';
 import 'package:safezone_ultra/ui/screens/parent/settings_screen.dart';
-import 'package:safezone_ultra/ui/screens/parent/offline_content_screen.dart';
 import 'package:safezone_ultra/ui/screens/games/mind_game_screen.dart';
 import 'package:safezone_ultra/ui/screens/games/maze_game_screen.dart';
 
@@ -55,7 +54,6 @@ class SafeZoneUltraApp extends StatelessWidget {
           '/child-progress': (_) => const ChildProgressDetailScreen(),
           '/screen-time': (_) => const ScreenTimeSettingsScreen(),
           '/settings': (_) => const SettingsScreen(),
-          '/offline': (_) => const OfflineContentScreen(),
           '/mind-game': (_) => const MindGameScreen(),
           '/maze-game': (_) => const MazeGameScreen(),
         },

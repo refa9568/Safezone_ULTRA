@@ -182,11 +182,6 @@ class ParentShell extends StatelessWidget {
                 onTap: () => Navigator.pushNamed(context, '/screen-time'),
               ),
               ListTile(
-                leading: const Icon(Icons.download_for_offline_outlined),
-                title: Text(t ? 'অফলাইন কনটেন্ট' : 'Offline Content Manager'),
-                onTap: () => Navigator.pushNamed(context, '/offline'),
-              ),
-              ListTile(
                 leading: const Icon(Icons.settings_outlined),
                 title: Text(t ? 'সেটিংস' : 'Settings'),
                 onTap: () => Navigator.pushNamed(context, '/settings'),
