@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:safezone_ultra/models/models.dart';
-import 'package:safezone_ultra/services/firebase/firestore_repository.dart';
+import 'package:safezone_ultra/backend/firestore_repository.dart';
 
 /// Firestore collection: quiz_results/{resultId}
 class QuizResultRepository extends FirestoreRepository<QuizResult> {

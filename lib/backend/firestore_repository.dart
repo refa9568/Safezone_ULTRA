@@ -45,4 +45,14 @@ abstract class FirestoreRepository<T> {
         .snapshots()
         .map((snap) => snap.docs.map((d) => fromMap(d.data(), d.id)).toList());
   }
+
+  /// Documents where [field] is one of [values]. Firestore rejects an empty
+  /// `whereIn` list, so this returns an empty stream instead of querying.
+  Stream<List<T>> streamWhereIn(String field, List<Object?> values) {
+    if (values.isEmpty) return Stream.value(<T>[]);
+    return collection
+        .where(field, whereIn: values)
+        .snapshots()
+        .map((snap) => snap.docs.map((d) => fromMap(d.data(), d.id)).toList());
+  }
 }

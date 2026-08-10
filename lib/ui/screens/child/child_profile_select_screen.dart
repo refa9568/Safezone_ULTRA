@@ -84,42 +84,51 @@ class ChildProfileSelectScreen extends StatelessWidget {
     final t = state.bengali;
     return Scaffold(
       appBar: AppBar(title: Text(t ? 'কে খেলছে? 🎮' : 'Who\'s Playing? 🎮')),
-      body: Stack(
-        children: [
-          const Positioned.fill(child: FloatingBubbles(count: 12)),
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
+      body: state.loading
+          ? const Center(child: CircularProgressIndicator())
+          : Stack(
               children: [
-                Expanded(
-                  child: GridView.count(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
+                const Positioned.fill(child: FloatingBubbles(count: 12)),
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
                     children: [
-                      for (int i = 0; i < state.children.length; i++)
-                        _ChildCard(
-                          child: state.children[i],
-                          colors: _kidCardColors[i % _kidCardColors.length],
-                          onTap: () {
-                            state.selectChild(state.children[i]);
-                            Navigator.pushReplacementNamed(context, '/child');
-                          },
+                      Expanded(
+                        child: GridView.count(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 16,
+                          crossAxisSpacing: 16,
+                          children: [
+                            for (int i = 0; i < state.children.length; i++)
+                              _ChildCard(
+                                child: state.children[i],
+                                colors:
+                                    _kidCardColors[i % _kidCardColors.length],
+                                onTap: () {
+                                  state.selectChild(state.children[i]);
+                                  Navigator.pushReplacementNamed(
+                                    context,
+                                    '/child',
+                                  );
+                                },
+                              ),
+                          ],
                         ),
+                      ),
+                      const SizedBox(height: 12),
+                      OutlinedButton.icon(
+                        onPressed: () =>
+                            _requestParentAccess(context, state, t),
+                        icon: const Icon(Icons.admin_panel_settings),
+                        label: Text(
+                          t ? 'অভিভাবক ড্যাশবোর্ড' : 'Parent Dashboard',
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
-                OutlinedButton.icon(
-                  onPressed: () => _requestParentAccess(context, state, t),
-                  icon: const Icon(Icons.admin_panel_settings),
-                  label: Text(t ? 'অভিভাবক ড্যাশবোর্ড' : 'Parent Dashboard'),
-                ),
               ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }

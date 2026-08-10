@@ -1,43 +1,69 @@
 import 'package:flutter/material.dart';
 import 'package:safezone_ultra/services/mock_data.dart';
 import 'package:safezone_ultra/models/models.dart';
+import 'package:safezone_ultra/backend/local_identity.dart';
+import 'package:safezone_ultra/backend/parent_repository.dart';
+import 'package:safezone_ultra/backend/child_repository.dart';
+import 'package:safezone_ultra/backend/quiz_result_repository.dart';
+import 'package:safezone_ultra/backend/badge_repository.dart';
+import 'package:safezone_ultra/backend/chat_message_repository.dart';
+import 'package:safezone_ultra/backend/notification_repository.dart';
 
 class AppState extends ChangeNotifier {
   bool bengali = false;
 
-  final Parent parent = Parent(
-    id: 'p1',
-    name: 'Rahim Uddin',
-    email: 'parent@example.com',
-    emergencyPhone: '+8801700000000',
-  );
+  /// True until [init] has loaded this household's real data from Firestore.
+  bool loading = true;
 
-  final List<Child> children = [
-    Child(
-      id: 'c1',
-      parentId: 'p1',
-      name: 'Adiba',
-      age: 8,
-      avatarEmoji: '🦊',
-      screenTimeLimitMinutes: 45,
-    ),
-    Child(
-      id: 'c2',
-      parentId: 'p1',
-      name: 'Rafi',
-      age: 6,
-      avatarEmoji: '🐼',
-      screenTimeLimitMinutes: 45,
-    ),
-  ];
+  final ParentRepository _parentRepo = ParentRepository();
+  final ChildRepository _childRepo = ChildRepository();
+  final QuizResultRepository _quizResultRepo = QuizResultRepository();
+  final BadgeRepository _badgeRepo = BadgeRepository();
+  final ChatMessageRepository _chatMessageRepo = ChatMessageRepository();
+  final NotificationRepository _notificationRepo = NotificationRepository();
 
+  Parent parent = Parent(id: '', name: 'Parent', email: '');
+
+  List<Child> children = [];
   Child? activeChild;
   bool parentMode = false;
 
-  final List<QuizResult> quizResults = [];
-  final List<EarnedBadge> badges = [];
-  final List<ChatMessage> chatMessages = [];
-  final List<AppNotification> notifications = [];
+  List<QuizResult> quizResults = [];
+  List<EarnedBadge> badges = [];
+  List<ChatMessage> chatMessages = [];
+  List<AppNotification> notifications = [];
+
+  /// Loads this device's parent/children/history from Firestore, creating a
+  /// Parent document on first launch. Every mutating method below updates
+  /// local state immediately (so the UI never waits on the network) and
+  /// persists the change to Firestore in the background.
+  Future<void> init() async {
+    final id = await LocalIdentity.parentId();
+    final existingParent = await _parentRepo.getById(id);
+    parent = existingParent ?? Parent(id: id, name: 'Parent', email: '');
+    if (existingParent == null) {
+      await _parentRepo.set(id, parent);
+    }
+
+    children = await _childRepo.streamForParent(parent.id).first;
+    notifications = await _notificationRepo.streamForParent(parent.id).first;
+
+    final childIds = children.map((c) => c.id).toList();
+    quizResults = await _quizResultRepo
+        .streamWhereIn('childId', childIds)
+        .first;
+    badges = await _badgeRepo.streamWhereIn('childId', childIds).first;
+    chatMessages = await _chatMessageRepo
+        .streamWhereIn('childId', childIds)
+        .first;
+    chatMessages.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
+    loading = false;
+    notifyListeners();
+  }
+
+  String _tempId(String prefix) =>
+      '$prefix${DateTime.now().microsecondsSinceEpoch}';
 
   String avatarForSex(String sex) {
     switch (sex.toLowerCase()) {
@@ -50,14 +76,15 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  Child addChildProfile({
+  void addChildProfile({
     required String name,
     required int age,
     required String sex,
     int screenTimeLimitMinutes = 60,
   }) {
+    final tempId = _tempId('c');
     final child = Child(
-      id: 'c${children.length + 1}',
+      id: tempId,
       parentId: parent.id,
       name: name,
       age: age,
@@ -66,10 +93,44 @@ class AppState extends ChangeNotifier {
     );
     children.add(child);
     notifyListeners();
-    return child;
+    _childRepo
+        .add(child)
+        .then((firestoreId) {
+          final idx = children.indexWhere((c) => c.id == tempId);
+          if (idx == -1) return;
+          children[idx] = Child(
+            id: firestoreId,
+            parentId: child.parentId,
+            name: child.name,
+            age: child.age,
+            avatarEmoji: child.avatarEmoji,
+            language: child.language,
+            usedMinutesToday: child.usedMinutesToday,
+            screenTimeLimitMinutes: child.screenTimeLimitMinutes,
+          );
+          notifyListeners();
+        })
+        .catchError((_) {});
   }
 
   void removeChildProfile(String childId) {
+    final resultIds = quizResults
+        .where((r) => r.childId == childId)
+        .map((r) => r.id)
+        .toList();
+    final badgeIds = badges
+        .where((b) => b.childId == childId)
+        .map((b) => b.id)
+        .toList();
+    final chatIds = chatMessages
+        .where((m) => m.childId == childId)
+        .map((m) => m.id)
+        .toList();
+    final notifIds = notifications
+        .where((n) => n.childId == childId)
+        .map((n) => n.id)
+        .toList();
+
     children.removeWhere((c) => c.id == childId);
     quizResults.removeWhere((r) => r.childId == childId);
     badges.removeWhere((b) => b.childId == childId);
@@ -79,6 +140,20 @@ class AppState extends ChangeNotifier {
       activeChild = null;
     }
     notifyListeners();
+
+    _childRepo.delete(childId).catchError((_) {});
+    for (final id in resultIds) {
+      _quizResultRepo.delete(id).catchError((_) {});
+    }
+    for (final id in badgeIds) {
+      _badgeRepo.delete(id).catchError((_) {});
+    }
+    for (final id in chatIds) {
+      _chatMessageRepo.delete(id).catchError((_) {});
+    }
+    for (final id in notifIds) {
+      _notificationRepo.delete(id).catchError((_) {});
+    }
   }
 
   void signInParent() {
@@ -106,16 +181,39 @@ class AppState extends ChangeNotifier {
   }
 
   void _pushLaunchNotification(Child child) {
-    notifications.insert(
-      0,
-      AppNotification(
-        id: 'n${notifications.length + 1}',
-        parentId: parent.id,
-        childId: child.id,
-        message: '${child.name} just opened SafeZone Ultra.',
-        sentAt: DateTime.now(),
-      ),
+    _addNotification(
+      childId: child.id,
+      message: '${child.name} just opened SafeZone Ultra.',
     );
+  }
+
+  void _addNotification({required String childId, required String message}) {
+    final tempId = _tempId('n');
+    final notification = AppNotification(
+      id: tempId,
+      parentId: parent.id,
+      childId: childId,
+      message: message,
+      sentAt: DateTime.now(),
+    );
+    notifications.insert(0, notification);
+    notifyListeners();
+    _notificationRepo
+        .add(notification)
+        .then((firestoreId) {
+          final idx = notifications.indexWhere((n) => n.id == tempId);
+          if (idx == -1) return;
+          notifications[idx] = AppNotification(
+            id: firestoreId,
+            parentId: notification.parentId,
+            childId: notification.childId,
+            message: notification.message,
+            isRead: notification.isRead,
+            sentAt: notification.sentAt,
+          );
+          notifyListeners();
+        })
+        .catchError((_) {});
   }
 
   int minutesRemaining(Child child) {
@@ -127,29 +225,32 @@ class AppState extends ChangeNotifier {
 
   void addUsageMinutes(Child child, int minutes) {
     child.usedMinutesToday += minutes;
+    notifyListeners();
+    _childRepo
+        .updateFields(child.id, {'usedMinutesToday': child.usedMinutesToday})
+        .catchError((_) {});
     if (child.usedMinutesToday >= child.screenTimeLimitMinutes) {
-      notifications.insert(
-        0,
-        AppNotification(
-          id: 'n${notifications.length + 1}',
-          parentId: parent.id,
-          childId: child.id,
-          message: '${child.name} has reached the daily screen time limit.',
-          sentAt: DateTime.now(),
-        ),
+      _addNotification(
+        childId: child.id,
+        message: '${child.name} has reached the daily screen time limit.',
       );
     }
-    notifyListeners();
   }
 
   void setScreenTimeLimitForChild(Child child, int minutes) {
     child.screenTimeLimitMinutes = minutes;
     notifyListeners();
+    _childRepo
+        .updateFields(child.id, {'screenTimeLimitMinutes': minutes})
+        .catchError((_) {});
   }
 
   void setEmergencyPhone(String phone) {
     parent.emergencyPhone = phone;
     notifyListeners();
+    _parentRepo
+        .updateFields(parent.id, {'emergencyPhone': phone})
+        .catchError((_) {});
   }
 
   bool verifyParentPin(String pin) => pin == parent.parentPin;
@@ -157,6 +258,7 @@ class AppState extends ChangeNotifier {
   void setParentPin(String pin) {
     parent.parentPin = pin;
     notifyListeners();
+    _parentRepo.updateFields(parent.id, {'parentPin': pin}).catchError((_) {});
   }
 
   List<QuizResult> resultsForChild(String childId) =>
@@ -168,31 +270,32 @@ class AppState extends ChangeNotifier {
   void submitQuizResult(Child child, Quiz quiz, int correctAnswers) {
     final stars = correctAnswers;
     final score = ((correctAnswers / quiz.questions.length) * 100).round();
-    quizResults.add(
-      QuizResult(
-        id: 'r${quizResults.length + 1}',
-        childId: child.id,
-        quizId: quiz.id,
-        score: score,
-        stars: stars,
-        attemptedAt: DateTime.now(),
-      ),
+    final result = QuizResult(
+      id: _tempId('r'),
+      childId: child.id,
+      quizId: quiz.id,
+      score: score,
+      stars: stars,
+      attemptedAt: DateTime.now(),
     );
+    quizResults.add(result);
+    _quizResultRepo.add(result).catchError((_) => '');
+
     if (score == 100) {
       final module = MockData.modules.firstWhere((m) => m.id == quiz.moduleId);
       final alreadyEarned = badges.any(
         (b) => b.childId == child.id && b.name == '${module.title} Master',
       );
       if (!alreadyEarned) {
-        badges.add(
-          EarnedBadge(
-            id: 'b${badges.length + 1}',
-            childId: child.id,
-            name: '${module.title} Master',
-            emoji: '🏅',
-            earnedAt: DateTime.now(),
-          ),
+        final badge = EarnedBadge(
+          id: _tempId('b'),
+          childId: child.id,
+          name: '${module.title} Master',
+          emoji: '🏅',
+          earnedAt: DateTime.now(),
         );
+        badges.add(badge);
+        _badgeRepo.add(badge).catchError((_) => '');
       }
     }
     notifyListeners();
@@ -203,15 +306,15 @@ class AppState extends ChangeNotifier {
       (b) => b.childId == child.id && b.name == 'Memory Master',
     );
     if (!alreadyEarned) {
-      badges.add(
-        EarnedBadge(
-          id: 'b${badges.length + 1}',
-          childId: child.id,
-          name: 'Memory Master',
-          emoji: '🧠',
-          earnedAt: DateTime.now(),
-        ),
+      final badge = EarnedBadge(
+        id: _tempId('b'),
+        childId: child.id,
+        name: 'Memory Master',
+        emoji: '🧠',
+        earnedAt: DateTime.now(),
       );
+      badges.add(badge);
+      _badgeRepo.add(badge).catchError((_) => '');
       notifyListeners();
     }
     return !alreadyEarned;
@@ -222,15 +325,15 @@ class AppState extends ChangeNotifier {
       (b) => b.childId == child.id && b.name == 'Maze Master',
     );
     if (!alreadyEarned) {
-      badges.add(
-        EarnedBadge(
-          id: 'b${badges.length + 1}',
-          childId: child.id,
-          name: 'Maze Master',
-          emoji: '🧩',
-          earnedAt: DateTime.now(),
-        ),
+      final badge = EarnedBadge(
+        id: _tempId('b'),
+        childId: child.id,
+        name: 'Maze Master',
+        emoji: '🧩',
+        earnedAt: DateTime.now(),
       );
+      badges.add(badge);
+      _badgeRepo.add(badge).catchError((_) => '');
       notifyListeners();
     }
     return !alreadyEarned;
@@ -238,45 +341,40 @@ class AppState extends ChangeNotifier {
 
   void askBuddy(Child child, String prompt) {
     final reply = MockData.chatbotReply(prompt);
-    chatMessages.add(
-      ChatMessage(
-        id: 'msg${chatMessages.length + 1}',
-        childId: child.id,
-        prompt: prompt,
-        response: '',
-        createdAt: DateTime.now(),
-        isUser: true,
-      ),
+    final now = DateTime.now();
+    final userMsg = ChatMessage(
+      id: _tempId('msgu'),
+      childId: child.id,
+      prompt: prompt,
+      response: '',
+      createdAt: now,
+      isUser: true,
     );
-    chatMessages.add(
-      ChatMessage(
-        id: 'msg${chatMessages.length + 1}',
-        childId: child.id,
-        prompt: prompt,
-        response: reply,
-        createdAt: DateTime.now(),
-      ),
+    final botMsg = ChatMessage(
+      id: _tempId('msgb'),
+      childId: child.id,
+      prompt: prompt,
+      response: reply,
+      createdAt: now.add(const Duration(milliseconds: 1)),
     );
+    chatMessages.add(userMsg);
+    chatMessages.add(botMsg);
     notifyListeners();
+    _chatMessageRepo.add(userMsg).catchError((_) => '');
+    _chatMessageRepo.add(botMsg).catchError((_) => '');
   }
 
   void triggerSos(Child child) {
-    notifications.insert(
-      0,
-      AppNotification(
-        id: 'n${notifications.length + 1}',
-        parentId: parent.id,
-        childId: child.id,
-        message: '🆘 SOS! ${child.name} needs help right now!',
-        sentAt: DateTime.now(),
-      ),
+    _addNotification(
+      childId: child.id,
+      message: '🆘 SOS! ${child.name} needs help right now!',
     );
-    notifyListeners();
   }
 
   void markNotificationRead(String id) {
     final n = notifications.firstWhere((n) => n.id == id);
     n.isRead = true;
     notifyListeners();
+    _notificationRepo.updateFields(id, {'isRead': true}).catchError((_) {});
   }
 }

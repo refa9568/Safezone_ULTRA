@@ -1,5 +1,5 @@
 import 'package:safezone_ultra/models/models.dart';
-import 'package:safezone_ultra/services/firebase/firestore_repository.dart';
+import 'package:safezone_ultra/backend/firestore_repository.dart';
 
 /// Firestore collection: parents/{parentId}
 class ParentRepository extends FirestoreRepository<Parent> {
