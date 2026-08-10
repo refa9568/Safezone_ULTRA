@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:safezone_ultra/models/models.dart';
 import 'package:safezone_ultra/logic/app_state.dart';
+import 'package:safezone_ultra/ui/widgets/child_avatar.dart';
 import 'package:safezone_ultra/ui/widgets/floating_bubbles.dart';
 
 const List<List<Color>> _kidCardColors = [
@@ -181,10 +182,7 @@ class _ChildCardState extends State<_ChildCard> {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                widget.child.avatarEmoji,
-                style: const TextStyle(fontSize: 60),
-              ),
+              ChildAvatar(child: widget.child, radius: 34),
               const SizedBox(height: 8),
               Flexible(
                 child: Padding(

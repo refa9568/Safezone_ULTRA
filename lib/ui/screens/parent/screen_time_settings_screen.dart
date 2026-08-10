@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:safezone_ultra/logic/app_state.dart';
 import 'package:safezone_ultra/models/models.dart';
+import 'package:safezone_ultra/ui/widgets/child_avatar.dart';
 
 class ScreenTimeSettingsScreen extends StatelessWidget {
   const ScreenTimeSettingsScreen({super.key});
@@ -58,7 +59,7 @@ class _ChildScreenTimeCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Text(child.avatarEmoji, style: const TextStyle(fontSize: 28)),
+                ChildAvatar(child: child, radius: 20),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(

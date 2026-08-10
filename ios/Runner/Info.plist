@@ -45,5 +45,7 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>SafeZone Ultra needs access to your photos so you can set a profile picture for your child.</string>
 </dict>
 </plist>

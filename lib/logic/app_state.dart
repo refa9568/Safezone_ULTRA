@@ -127,6 +127,7 @@ class AppState extends ChangeNotifier {
     required int age,
     required String sex,
     int screenTimeLimitMinutes = 60,
+    String? photoBase64,
   }) {
     final tempId = _tempId('c');
     final child = Child(
@@ -135,6 +136,7 @@ class AppState extends ChangeNotifier {
       name: name,
       age: age,
       avatarEmoji: avatarForSex(sex),
+      photoBase64: photoBase64,
       screenTimeLimitMinutes: screenTimeLimitMinutes,
     );
     children.add(child);
@@ -150,6 +152,7 @@ class AppState extends ChangeNotifier {
             name: child.name,
             age: child.age,
             avatarEmoji: child.avatarEmoji,
+            photoBase64: child.photoBase64,
             language: child.language,
             usedMinutesToday: child.usedMinutesToday,
             screenTimeLimitMinutes: child.screenTimeLimitMinutes,

@@ -37,6 +37,7 @@ class Child {
   String name;
   int age;
   String avatarEmoji;
+  String? photoBase64;
   String language; // 'en' or 'bn'
   int usedMinutesToday;
   int screenTimeLimitMinutes;
@@ -47,6 +48,7 @@ class Child {
     required this.name,
     required this.age,
     required this.avatarEmoji,
+    this.photoBase64,
     this.language = 'en',
     this.usedMinutesToday = 0,
     this.screenTimeLimitMinutes = 60,

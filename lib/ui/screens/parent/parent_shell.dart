@@ -1,10 +1,15 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:safezone_ultra/backend/auth_service.dart';
 import 'package:safezone_ultra/models/models.dart';
 import 'package:safezone_ultra/logic/app_state.dart';
 import 'package:safezone_ultra/ui/theme/app_theme.dart';
 import 'package:safezone_ultra/ui/screens/parent/notification_center_screen.dart';
+import 'package:safezone_ultra/ui/widgets/child_avatar.dart';
 
 class ParentShell extends StatelessWidget {
   const ParentShell({super.key});
@@ -17,6 +22,19 @@ class ParentShell extends StatelessWidget {
     final nameController = TextEditingController();
     final ageController = TextEditingController();
     String sex = 'Female';
+    String? photoBase64;
+
+    Future<void> pickPhoto(void Function(void Function()) setState) async {
+      final picked = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 400,
+        maxHeight: 400,
+        imageQuality: 70,
+      );
+      if (picked == null) return;
+      final bytes = await File(picked.path).readAsBytes();
+      setState(() => photoBase64 = base64Encode(bytes));
+    }
 
     await showDialog<void>(
       context: context,
@@ -29,6 +47,24 @@ class ParentShell extends StatelessWidget {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              GestureDetector(
+                onTap: () => pickPhoto(setState),
+                child: CircleAvatar(
+                  radius: 36,
+                  backgroundImage: photoBase64 != null
+                      ? MemoryImage(base64Decode(photoBase64!))
+                      : null,
+                  child: photoBase64 == null
+                      ? const Icon(Icons.add_a_photo_outlined, size: 28)
+                      : null,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                t ? 'ছবি যোগ করুন (ঐচ্ছিক)' : 'Add photo (optional)',
+                style: const TextStyle(fontSize: 12, color: Colors.black54),
+              ),
+              const SizedBox(height: 12),
               TextField(
                 controller: nameController,
                 decoration: InputDecoration(labelText: t ? 'নাম' : 'Name'),
@@ -82,7 +118,12 @@ class ParentShell extends StatelessWidget {
                   );
                   return;
                 }
-                state.addChildProfile(name: name, age: age, sex: sex);
+                state.addChildProfile(
+                  name: name,
+                  age: age,
+                  sex: sex,
+                  photoBase64: photoBase64,
+                );
                 Navigator.pop(dialogContext);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -285,10 +326,7 @@ class _ChildProgressCard extends StatelessWidget {
     return Card(
       child: ListTile(
         contentPadding: const EdgeInsets.all(12),
-        leading: CircleAvatar(
-          radius: 24,
-          child: Text(child.avatarEmoji, style: const TextStyle(fontSize: 22)),
-        ),
+        leading: ChildAvatar(child: child, radius: 24),
         title: Text(
           child.name,
           style: const TextStyle(fontWeight: FontWeight.w600),
