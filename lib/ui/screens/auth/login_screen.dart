@@ -116,7 +116,19 @@ class _LoginScreenState extends State<LoginScreen> {
                     border: const OutlineInputBorder(),
                   ),
                 ),
-                const SizedBox(height: 24),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: _loading
+                        ? null
+                        : () =>
+                              Navigator.pushNamed(context, '/forgot-password'),
+                    child: Text(
+                      t ? 'পাসওয়ার্ড ভুলে গেছেন?' : 'Forgot password?',
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
                 ElevatedButton(
                   onPressed: _loading ? null : () => _login(t),
                   child: _loading

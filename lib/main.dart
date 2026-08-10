@@ -7,6 +7,7 @@ import 'package:safezone_ultra/logic/app_state.dart';
 import 'package:safezone_ultra/ui/theme/app_theme.dart';
 import 'package:safezone_ultra/ui/screens/auth/splash_screen.dart';
 import 'package:safezone_ultra/ui/screens/auth/login_screen.dart';
+import 'package:safezone_ultra/ui/screens/auth/forgot_password_screen.dart';
 import 'package:safezone_ultra/ui/screens/auth/register_screen.dart';
 import 'package:safezone_ultra/ui/screens/auth/verify_email_screen.dart';
 import 'package:safezone_ultra/ui/screens/child/child_profile_select_screen.dart';
@@ -46,6 +47,7 @@ class SafeZoneUltraApp extends StatelessWidget {
         routes: {
           '/': (_) => const SplashScreen(),
           '/login': (_) => const LoginScreen(),
+          '/forgot-password': (_) => const ForgotPasswordScreen(),
           '/register': (_) => const RegisterScreen(),
           '/verify-email': (_) => const VerifyEmailScreen(),
           '/profiles': (_) => const ChildProfileSelectScreen(),

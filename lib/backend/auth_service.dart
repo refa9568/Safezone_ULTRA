@@ -22,6 +22,13 @@ class AuthService {
 
   Future<void> signOut() => _auth.signOut();
 
+  /// Sends a password reset link to this email. Firebase handles the reset
+  /// page and updates the account's password directly - the app never sees
+  /// the new password.
+  Future<void> sendPasswordResetEmail(String email) {
+    return _auth.sendPasswordResetEmail(email: email);
+  }
+
   /// Permanently deletes the signed-in Firebase Auth account. Call this
   /// alongside AppState.deleteAllData() (Firestore) to fully remove a user.
   /// Firebase requires a recent sign-in for this - if it's been a while,
