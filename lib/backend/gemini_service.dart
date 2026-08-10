@@ -12,7 +12,7 @@ class GeminiService {
       return null;
     }
     _model ??= GenerativeModel(
-      model: 'gemini-2.0-flash',
+      model: 'gemini-flash-latest',
       apiKey: geminiApiKey,
       systemInstruction: Content.system(
         'You are Safety Buddy, a friendly chatbot inside a child-safety '
@@ -24,7 +24,10 @@ class GeminiService {
         'conversation back to safety topics instead of answering it. '
         'Never share personal contact info, addresses, or unsafe advice.',
       ),
-      generationConfig: GenerationConfig(maxOutputTokens: 200),
+      // gemini-flash-latest is a "thinking" model that spends part of the
+      // token budget on internal reasoning before the visible answer, so
+      // this needs real headroom or replies get cut off mid-sentence.
+      generationConfig: GenerationConfig(maxOutputTokens: 1024),
     );
     return _model;
   }
@@ -42,7 +45,7 @@ class GeminiService {
           .generateContent([
             Content.text('$languageNote\n\nChild asks: $prompt'),
           ])
-          .timeout(const Duration(seconds: 15));
+          .timeout(const Duration(seconds: 25));
       final text = response.text?.trim();
       return (text == null || text.isEmpty) ? null : text;
     } catch (_) {
