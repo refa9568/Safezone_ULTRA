@@ -51,12 +51,12 @@ class ParentShell extends StatelessWidget {
               GestureDetector(
                 onTap: () => pickPhoto(setState),
                 child: CircleAvatar(
-                  radius: 36,
+                  radius: 28,
                   backgroundImage: photoBase64 != null
                       ? MemoryImage(base64Decode(photoBase64!))
                       : null,
                   child: photoBase64 == null
-                      ? const Icon(Icons.add_a_photo_outlined, size: 28)
+                      ? const Icon(Icons.add_a_photo_outlined, size: 22)
                       : null,
                 ),
               ),
@@ -65,21 +65,30 @@ class ParentShell extends StatelessWidget {
                 t ? 'ছবি যোগ করুন (ঐচ্ছিক)' : 'Add photo (optional)',
                 style: const TextStyle(fontSize: 12, color: Colors.black54),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               TextField(
                 controller: nameController,
-                decoration: InputDecoration(labelText: t ? 'নাম' : 'Name'),
+                decoration: InputDecoration(
+                  labelText: t ? 'নাম' : 'Name',
+                  isDense: true,
+                ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               TextField(
                 controller: ageController,
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: t ? 'বয়স' : 'Age'),
+                decoration: InputDecoration(
+                  labelText: t ? 'বয়স' : 'Age',
+                  isDense: true,
+                ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               DropdownButtonFormField<String>(
                 initialValue: sex,
-                decoration: InputDecoration(labelText: t ? 'লিঙ্গ' : 'Sex'),
+                decoration: InputDecoration(
+                  labelText: t ? 'লিঙ্গ' : 'Sex',
+                  isDense: true,
+                ),
                 items: [
                   DropdownMenuItem(
                     value: 'Female',
