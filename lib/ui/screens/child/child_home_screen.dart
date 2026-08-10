@@ -255,10 +255,12 @@ class ChildHomeScreen extends StatelessWidget {
     Child child,
     bool t,
   ) async {
+    // Always record the alert first, regardless of whether the call/text
+    // below succeeds, so the parent sees it in their notifications either way.
     state.triggerSos(child);
     final phone = state.parent.emergencyPhone;
     if (phone.isEmpty) {
-      showDialog(
+      await showDialog(
         context: context,
         builder: (dialogContext) => AlertDialog(
           shape: RoundedRectangleBorder(
@@ -300,7 +302,79 @@ class ChildHomeScreen extends StatelessWidget {
       );
       return;
     }
-    await launchUrl(Uri(scheme: 'tel', path: phone));
+
+    var callPlaced = false;
+    try {
+      callPlaced = await launchUrl(Uri(scheme: 'tel', path: phone));
+    } catch (_) {
+      callPlaced = false;
+    }
+
+    if (!callPlaced && context.mounted) {
+      await _showCallFailedDialog(context, child, phone, t);
+    }
+  }
+
+  Future<void> _showCallFailedDialog(
+    BuildContext context,
+    Child child,
+    String phone,
+    bool t,
+  ) async {
+    await showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('🆘', style: TextStyle(fontSize: 56)),
+            const SizedBox(height: 12),
+            Text(
+              t ? 'কল করা যায়নি' : "Couldn't start the call",
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              t
+                  ? 'তোমার অভিভাবককে জানানো হয়েছে, কিন্তু এই ডিভাইস থেকে সরাসরি কল করা যায়নি। এখন একটা মেসেজ পাঠানোর চেষ্টা করো।'
+                  : "Your parent has still been alerted, but this device couldn't start a phone call. Try sending a text instead.",
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.grey),
+            ),
+          ],
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(t ? 'বন্ধ করো' : 'Close'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              final message = t
+                  ? '${child.name} জরুরি সাহায্য চাইছে! এখনই দেখো।'
+                  : '${child.name} needs help right now! SOS from SafeZone Ultra.';
+              try {
+                await launchUrl(
+                  Uri(
+                    scheme: 'sms',
+                    path: phone,
+                    queryParameters: {'body': message},
+                  ),
+                );
+              } catch (_) {
+                // No SMS app available either; the in-app notification is
+                // already recorded, so there's nothing further to do here.
+              }
+            },
+            child: Text(t ? 'মেসেজ পাঠাও' : 'Send Text'),
+          ),
+        ],
+      ),
+    );
   }
 
   String _emojiFor(HazardCategory category) {
