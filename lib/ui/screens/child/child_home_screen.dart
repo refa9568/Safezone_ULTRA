@@ -5,6 +5,7 @@ import 'package:safezone_ultra/services/mock_data.dart';
 import 'package:safezone_ultra/models/models.dart';
 import 'package:safezone_ultra/logic/app_state.dart';
 import 'package:safezone_ultra/ui/theme/app_theme.dart';
+import 'package:safezone_ultra/ui/widgets/child_avatar.dart';
 import 'package:safezone_ultra/ui/widgets/floating_bubbles.dart';
 
 const Map<HazardCategory, List<Color>> _categoryColors = {
@@ -30,11 +31,18 @@ class ChildHomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.all(6),
+          child: GestureDetector(
+            onTap: () => Navigator.pushNamed(context, '/child-profile'),
+            child: ChildAvatar(child: child, radius: 18),
+          ),
+        ),
         title: Row(
           children: [
             Flexible(
               child: Text(
-                '${t ? 'হ্যালো' : 'Hi'}, ${child.name} ${child.avatarEmoji}',
+                '${t ? 'হ্যালো' : 'Hi'}, ${child.name}',
                 overflow: TextOverflow.ellipsis,
               ),
             ),

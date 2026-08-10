@@ -11,6 +11,8 @@ import 'package:safezone_ultra/ui/screens/auth/register_screen.dart';
 import 'package:safezone_ultra/ui/screens/auth/verify_email_screen.dart';
 import 'package:safezone_ultra/ui/screens/child/child_profile_select_screen.dart';
 import 'package:safezone_ultra/ui/screens/child/child_shell.dart';
+import 'package:safezone_ultra/ui/screens/child/child_own_profile_screen.dart';
+import 'package:safezone_ultra/ui/screens/badges/badge_collection_screen.dart';
 import 'package:safezone_ultra/ui/screens/lessons/lesson_list_screen.dart';
 import 'package:safezone_ultra/ui/screens/lessons/lesson_player_screen.dart';
 import 'package:safezone_ultra/ui/screens/quiz/quiz_screen.dart';
@@ -58,6 +60,8 @@ class SafeZoneUltraApp extends StatelessWidget {
           '/settings': (_) => const SettingsScreen(),
           '/mind-game': (_) => const MindGameScreen(),
           '/maze-game': (_) => const MazeGameScreen(),
+          '/child-profile': (_) => const ChildOwnProfileScreen(),
+          '/badges': (_) => const BadgeCollectionScreen(),
         },
       ),
     );

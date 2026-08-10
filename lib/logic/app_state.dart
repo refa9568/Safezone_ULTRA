@@ -280,6 +280,14 @@ class AppState extends ChangeNotifier {
     }
   }
 
+  void updateChildPhoto(Child child, String? photoBase64) {
+    child.photoBase64 = photoBase64;
+    notifyListeners();
+    _childRepo
+        .updateFields(child.id, {'photoBase64': photoBase64})
+        .catchError((_) {});
+  }
+
   void setScreenTimeLimitForChild(Child child, int minutes) {
     child.screenTimeLimitMinutes = minutes;
     notifyListeners();
