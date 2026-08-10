@@ -2,13 +2,76 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // TEMPORARY development rules: wide open so the app can read/write
-    // while the backend is being built, since Firebase Auth isn't wired
-    // in yet. Auto-expires 2026-09-09 — replace with rules scoped to
-    // request.auth.uid (matching parentId/childId on each collection)
-    // before that date or before shipping.
-    match /{document=**} {
-      allow read, write: if request.time < timestamp.date(2026, 9, 9);
+
+    function isSignedIn() {
+      return request.auth != null;
     }
+
+    // True if the given child document belongs to the signed-in parent.
+    // Costs one extra document read per call, but keeps quiz results,
+    // badges, and chat messages scoped correctly without duplicating
+    // parentId onto every one of those documents.
+    function childBelongsToMe(childId) {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/children/$(childId)).data.parentId
+          == request.auth.uid;
+    }
+
+    // Parent's own profile, keyed by their Firebase Auth uid.
+    match /parents/{parentId} {
+      allow read, write: if isSignedIn() && request.auth.uid == parentId;
+    }
+
+    // Each child belongs to exactly one parent.
+    match /children/{childId} {
+      allow read, update, delete: if isSignedIn()
+        && resource.data.parentId == request.auth.uid;
+      allow create: if isSignedIn()
+        && request.resource.data.parentId == request.auth.uid;
+    }
+
+    match /quiz_results/{resultId} {
+      allow read, delete: if childBelongsToMe(resource.data.childId);
+      allow create: if childBelongsToMe(request.resource.data.childId);
+    }
+
+    match /badges/{badgeId} {
+      allow read, delete: if childBelongsToMe(resource.data.childId);
+      allow create: if childBelongsToMe(request.resource.data.childId);
+    }
+
+    match /chat_messages/{messageId} {
+      allow read, delete: if childBelongsToMe(resource.data.childId);
+      allow create: if childBelongsToMe(request.resource.data.childId);
+    }
+
+    match /notifications/{notificationId} {
+      allow read, update, delete: if isSignedIn()
+        && resource.data.parentId == request.auth.uid;
+      allow create: if isSignedIn()
+        && request.resource.data.parentId == request.auth.uid;
+    }
+
+    // Static lesson/quiz content (not user data - the app's curriculum).
+    // Publicly readable - ContentSeeder loads it from main(), before
+    // Firebase Auth has a signed-in user, so read access cannot require
+    // isSignedIn() without breaking every cold app launch. Writable by any
+    // signed-in user because ContentSeeder also self-seeds this from
+    // lib/data on first run for whoever opens the app first; it's a no-op
+    // once the collections are non-empty.
+    // Known limitation: without an admin role, any signed-in user could
+    // technically edit shared lesson content - acceptable for now since it
+    // holds no personal data, but worth locking to an admin claim later.
+    match /lessons/{lessonId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+
+    match /quizzes/{quizId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+
+    // Everything else is denied by default (no catch-all rule).
   }
 }
