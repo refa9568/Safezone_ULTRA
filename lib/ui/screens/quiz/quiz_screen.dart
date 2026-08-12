@@ -63,14 +63,22 @@ class QuizScreen extends StatefulWidget {
   State<QuizScreen> createState() => _QuizScreenState();
 }
 
+const int _maxAttempts = 3;
+
 class _QuizScreenState extends State<QuizScreen> {
-  int _questionIndex = 0;
+  late List<int> _queue;
+  int _queuePos = 0;
   bool _initialized = false;
   late List<bool> _answered;
   late List<bool> _isCorrect;
-  late List<Set<int>> _triedWrong;
+  late List<int> _attempt;
+  late List<int?> _wrongSelected;
+  late List<List<int>> _optionOrder;
   bool _showEncouragement = false;
   int _encouragementIndex = 0;
+  bool _celebrating = false;
+  int _celebrationKey = 0;
+  final GlobalKey<_CarSliderState> _carSliderKey = GlobalKey();
 
   @override
   void didChangeDependencies() {
@@ -78,11 +86,35 @@ class _QuizScreenState extends State<QuizScreen> {
     if (!_initialized) {
       final quiz = ModalRoute.of(context)!.settings.arguments as Quiz;
       final n = quiz.questions.length;
+      _queue = List.generate(n, (i) => i);
       _answered = List.filled(n, false);
       _isCorrect = List.filled(n, false);
-      _triedWrong = List.generate(n, (_) => <int>{});
+      _attempt = List.filled(n, 1);
+      _wrongSelected = List<int?>.filled(n, null);
+      _optionOrder = List.generate(
+        n,
+        (i) => _shuffledOrder(quiz.questions[i].options.length, null),
+      );
       _initialized = true;
     }
+  }
+
+  List<int> _shuffledOrder(int length, List<int>? avoid) {
+    final rnd = Random();
+    var order = List.generate(length, (i) => i);
+    var tries = 0;
+    do {
+      order = List.generate(length, (i) => i)..shuffle(rnd);
+      tries++;
+    } while (avoid != null && _sameOrder(order, avoid) && tries < 5);
+    return order;
+  }
+
+  bool _sameOrder(List<int> a, List<int> b) {
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
   }
 
   @override
@@ -90,8 +122,10 @@ class _QuizScreenState extends State<QuizScreen> {
     final quiz = ModalRoute.of(context)!.settings.arguments as Quiz;
     final state = context.watch<AppState>();
     final t = state.bengali;
-    final question = quiz.questions[_questionIndex];
+    final qIdx = _queue[_queuePos];
+    final question = quiz.questions[qIdx];
     final options = t ? question.optionsBn : question.options;
+    final order = _optionOrder[qIdx];
     final starCount = _isCorrect.where((c) => c).length;
     final category = MockData.modules
         .firstWhere((m) => m.id == quiz.moduleId)
@@ -104,7 +138,7 @@ class _QuizScreenState extends State<QuizScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          '${quiz.title} (${_questionIndex + 1}/${quiz.questions.length})',
+          '${quiz.title} (${_queuePos + 1}/${quiz.questions.length})',
         ),
         actions: [
           Padding(
@@ -156,7 +190,7 @@ class _QuizScreenState extends State<QuizScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 LinearProgressIndicator(
-                  value: (_questionIndex + 1) / quiz.questions.length,
+                  value: (_queuePos + 1) / quiz.questions.length,
                 ),
                 const SizedBox(height: 24),
                 Expanded(
@@ -180,14 +214,49 @@ class _QuizScreenState extends State<QuizScreen> {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        for (int i = 0; i < options.length; i++)
+                        for (int origIdx in order)
                           _buildOption(
                             context,
-                            i,
-                            options[i],
+                            qIdx,
+                            origIdx,
+                            options[origIdx],
                             question,
                             accent,
                           ),
+                        if (_wrongSelected[qIdx] != null &&
+                            !_answered[qIdx]) ...[
+                          const SizedBox(height: 4),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  onPressed: _tryAgain,
+                                  icon: const Icon(Icons.refresh_rounded),
+                                  label: Text(
+                                    t ? 'আবার চেষ্টা করো' : 'Try Again',
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green.shade600,
+                                    foregroundColor: Colors.white,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  onPressed: _skip,
+                                  icon: const Icon(Icons.skip_next_rounded),
+                                  label: Text(t ? 'বাদ দাও' : 'Skip'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.red.shade600,
+                                    foregroundColor: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                         if (_showEncouragement) ...[
                           const SizedBox(height: 8),
                           Container(
@@ -225,16 +294,27 @@ class _QuizScreenState extends State<QuizScreen> {
                 ),
                 const SizedBox(height: 12),
                 _CarSlider(
-                  canNext: _answered[_questionIndex],
-                  canPrev: _questionIndex > 0,
-                  carEmoji:
-                      _carEmojis[(_questionIndex ~/ 3) % _carEmojis.length],
+                  key: _carSliderKey,
+                  canNext: _answered[qIdx],
+                  canPrev: _queuePos > 0,
+                  carEmoji: _carEmojis[(_queuePos ~/ 3) % _carEmojis.length],
                   onNext: _goNext,
                   onPrev: _goPrev,
                 ),
               ],
             ),
           ),
+          if (_celebrating)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 110,
+              child: IgnorePointer(
+                child: Center(
+                  child: _CelebrationPopup(key: ValueKey(_celebrationKey)),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -242,21 +322,22 @@ class _QuizScreenState extends State<QuizScreen> {
 
   Widget _buildOption(
     BuildContext context,
-    int i,
+    int qIdx,
+    int origIdx,
     String label,
     QuizQuestion question,
     Color accent,
   ) {
-    final answered = _answered[_questionIndex];
-    final triedWrong = _triedWrong[_questionIndex];
+    final answered = _answered[qIdx];
+    final wrongSelected = _wrongSelected[qIdx];
     Color? color;
-    if (answered && i == question.correctIndex) {
+    if (answered && origIdx == question.correctIndex) {
       color = Colors.green.shade100;
-    } else if (triedWrong.contains(i)) {
+    } else if (wrongSelected == origIdx) {
       color = Colors.amber.shade50;
     }
-    final disabled = answered || triedWrong.contains(i);
-    final borderColor = triedWrong.contains(i)
+    final disabled = answered || wrongSelected != null;
+    final borderColor = wrongSelected == origIdx
         ? Colors.amber.shade300
         : accent.withValues(alpha: 0.35);
     return Padding(
@@ -266,7 +347,7 @@ class _QuizScreenState extends State<QuizScreen> {
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
-          onTap: disabled ? null : () => _selectAnswer(i, question),
+          onTap: disabled ? null : () => _selectAnswer(qIdx, origIdx, question),
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -284,8 +365,8 @@ class _QuizScreenState extends State<QuizScreen> {
                     ),
                   ),
                 ),
-                if (triedWrong.contains(i) &&
-                    !(answered && i == question.correctIndex))
+                if (wrongSelected == origIdx &&
+                    !(answered && origIdx == question.correctIndex))
                   const Text('🤔', style: TextStyle(fontSize: 18)),
               ],
             ),
@@ -295,22 +376,29 @@ class _QuizScreenState extends State<QuizScreen> {
     );
   }
 
-  void _selectAnswer(int i, QuizQuestion question) {
-    if (_answered[_questionIndex]) return;
+  void _selectAnswer(int qIdx, int origIdx, QuizQuestion question) {
+    if (_answered[qIdx] || _wrongSelected[qIdx] != null) return;
 
-    if (i == question.correctIndex) {
+    if (origIdx == question.correctIndex) {
       setState(() {
-        _answered[_questionIndex] = true;
-        _isCorrect[_questionIndex] = true;
+        _answered[qIdx] = true;
+        _isCorrect[qIdx] = true;
         _showEncouragement = false;
+        _celebrating = true;
+        _celebrationKey++;
       });
+      Future.delayed(const Duration(milliseconds: 1200), () {
+        if (mounted) setState(() => _celebrating = false);
+      });
+      _carSliderKey.currentState?.autoRun();
       return;
     }
 
     setState(() {
-      _triedWrong[_questionIndex].add(i);
-      if (_triedWrong[_questionIndex].length >= question.options.length - 1) {
-        _answered[_questionIndex] = true;
+      _wrongSelected[qIdx] = origIdx;
+      if (_attempt[qIdx] >= _maxAttempts) {
+        // Out of attempts: reveal the correct answer, no more retries.
+        _answered[qIdx] = true;
         _showEncouragement = false;
       } else {
         _encouragementIndex = Random().nextInt(_encouragements.length);
@@ -319,10 +407,39 @@ class _QuizScreenState extends State<QuizScreen> {
     });
   }
 
-  void _goNext() {
-    if (!_answered[_questionIndex]) return;
+  void _tryAgain() {
+    final qIdx = _queue[_queuePos];
     final quiz = ModalRoute.of(context)!.settings.arguments as Quiz;
-    if (_questionIndex == quiz.questions.length - 1) {
+    final optionCount = quiz.questions[qIdx].options.length;
+    setState(() {
+      _attempt[qIdx]++;
+      _optionOrder[qIdx] = _shuffledOrder(optionCount, _optionOrder[qIdx]);
+      _wrongSelected[qIdx] = null;
+      _showEncouragement = false;
+    });
+  }
+
+  void _skip() {
+    final quiz = ModalRoute.of(context)!.settings.arguments as Quiz;
+    setState(() {
+      final current = _queue.removeAt(_queuePos);
+      _queue.add(current);
+      // Skipped questions come back fresh, as if seen for the first time.
+      _attempt[current] = 1;
+      _wrongSelected[current] = null;
+      _optionOrder[current] = _shuffledOrder(
+        quiz.questions[current].options.length,
+        _optionOrder[current],
+      );
+      _showEncouragement = false;
+    });
+  }
+
+  void _goNext() {
+    final qIdx = _queue[_queuePos];
+    if (!_answered[qIdx]) return;
+    final quiz = ModalRoute.of(context)!.settings.arguments as Quiz;
+    if (_queuePos == _queue.length - 1) {
       final state = context.read<AppState>();
       final child = state.activeChild!;
       final correctCount = _isCorrect.where((c) => c).length;
@@ -334,16 +451,16 @@ class _QuizScreenState extends State<QuizScreen> {
       );
     } else {
       setState(() {
-        _questionIndex++;
+        _queuePos++;
         _showEncouragement = false;
       });
     }
   }
 
   void _goPrev() {
-    if (_questionIndex == 0) return;
+    if (_queuePos == 0) return;
     setState(() {
-      _questionIndex--;
+      _queuePos--;
       _showEncouragement = false;
     });
   }
@@ -357,6 +474,7 @@ class _CarSlider extends StatefulWidget {
   final VoidCallback onPrev;
 
   const _CarSlider({
+    super.key,
     required this.canNext,
     required this.canPrev,
     required this.carEmoji,
@@ -368,15 +486,49 @@ class _CarSlider extends StatefulWidget {
   State<_CarSlider> createState() => _CarSliderState();
 }
 
-class _CarSliderState extends State<_CarSlider> {
+class _CarSliderState extends State<_CarSlider>
+    with SingleTickerProviderStateMixin {
   static const double _carSize = 60;
   double _drag = 0;
+  double _lastMaxOffset = 0;
+  late final AnimationController _autoController;
+
+  @override
+  void initState() {
+    super.initState();
+    _autoController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 550),
+    )..addListener(() {
+      setState(() => _drag = _autoController.value * _lastMaxOffset);
+    });
+    _autoController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        widget.onNext();
+        _autoController.value = 0;
+        setState(() => _drag = 0);
+      }
+    });
+  }
+
+  void autoRun() {
+    if (_lastMaxOffset > 0) {
+      _autoController.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _autoController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final maxOffset = (constraints.maxWidth - _carSize) / 2 - 6;
+        _lastMaxOffset = maxOffset;
         final dragClamped = _drag.clamp(-maxOffset, maxOffset);
         return Container(
           height: 84,
@@ -434,6 +586,62 @@ class _CarSliderState extends State<_CarSlider> {
           ),
         );
       },
+    );
+  }
+}
+
+class _CelebrationPopup extends StatefulWidget {
+  const _CelebrationPopup({super.key});
+
+  @override
+  State<_CelebrationPopup> createState() => _CelebrationPopupState();
+}
+
+class _CelebrationPopupState extends State<_CelebrationPopup>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _rise;
+  late final Animation<double> _opacity;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
+    _rise = Tween<double>(begin: 40, end: -30).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 0.7, curve: Curves.easeOut),
+      ),
+    );
+    _opacity = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 20),
+      TweenSequenceItem(tween: ConstantTween(1.0), weight: 45),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 35),
+    ]).animate(_controller);
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) => Opacity(
+        opacity: _opacity.value,
+        child: Transform.translate(
+          offset: Offset(0, _rise.value),
+          child: child,
+        ),
+      ),
+      child: const Text('🎉', style: TextStyle(fontSize: 64)),
     );
   }
 }
