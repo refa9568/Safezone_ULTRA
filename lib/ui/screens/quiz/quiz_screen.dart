@@ -54,7 +54,20 @@ const List<Map<String, String>> _encouragements = [
   },
 ];
 
-const List<String> _carEmojis = ['🏎️', '🚓', '🚕', '🚙', '🚐', '🚌'];
+const List<String> _neutralEmojis = ['🏎️', '🚓', '🚕', '🚙', '🚐', '🚌'];
+const List<String> _maleEmojis = ['🏎️', '🚓', '🚑', '🚒', '🚕', '🚙', '🚐', '🚌'];
+const List<String> _femaleEmojis = ['🪆', '👗', '🎀', '🦄', '👑', '🩰', '💃', '🧸'];
+
+List<String> _carEmojisForSex(String? sex) {
+  switch (sex?.toLowerCase()) {
+    case 'male':
+      return _maleEmojis;
+    case 'female':
+      return _femaleEmojis;
+    default:
+      return _neutralEmojis;
+  }
+}
 
 class QuizScreen extends StatefulWidget {
   const QuizScreen({super.key});
@@ -127,6 +140,7 @@ class _QuizScreenState extends State<QuizScreen> {
     final options = t ? question.optionsBn : question.options;
     final order = _optionOrder[qIdx];
     final starCount = _isCorrect.where((c) => c).length;
+    final carEmojis = _carEmojisForSex(state.activeChild?.sex);
     final category = MockData.modules
         .firstWhere((m) => m.id == quiz.moduleId)
         .category;
@@ -297,7 +311,7 @@ class _QuizScreenState extends State<QuizScreen> {
                   key: _carSliderKey,
                   canNext: _answered[qIdx],
                   canPrev: _queuePos > 0,
-                  carEmoji: _carEmojis[(_queuePos ~/ 3) % _carEmojis.length],
+                  carEmoji: carEmojis[_queuePos % carEmojis.length],
                   onNext: _goNext,
                   onPrev: _goPrev,
                 ),

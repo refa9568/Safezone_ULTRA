@@ -39,6 +39,7 @@ class Child {
   String avatarEmoji;
   String? photoBase64;
   String language; // 'en' or 'bn'
+  String sex; // 'Male', 'Female', or 'Other'
   int usedMinutesToday;
   int screenTimeLimitMinutes;
   String lastUsageDate; // 'yyyy-MM-dd', local to the device
@@ -54,6 +55,7 @@ class Child {
     required this.avatarEmoji,
     this.photoBase64,
     this.language = 'en',
+    this.sex = 'Other',
     this.usedMinutesToday = 0,
     this.screenTimeLimitMinutes = 60,
     this.lastUsageDate = '',

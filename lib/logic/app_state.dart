@@ -143,6 +143,7 @@ class AppState extends ChangeNotifier {
       age: age,
       avatarEmoji: avatarForSex(sex),
       photoBase64: photoBase64,
+      sex: sex,
       screenTimeLimitMinutes: screenTimeLimitMinutes,
     );
     children.add(child);
@@ -160,6 +161,7 @@ class AppState extends ChangeNotifier {
             avatarEmoji: child.avatarEmoji,
             photoBase64: child.photoBase64,
             language: child.language,
+            sex: child.sex,
             usedMinutesToday: child.usedMinutesToday,
             screenTimeLimitMinutes: child.screenTimeLimitMinutes,
             lastUsageDate: child.lastUsageDate,
