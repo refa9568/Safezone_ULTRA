@@ -47,5 +47,9 @@
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>SafeZone Ultra needs access to your photos so you can set a profile picture for your child.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>SafeZone Ultra needs microphone access so kids can talk to Safety Buddy.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>SafeZone Ultra needs speech recognition so Safety Buddy can understand what kids say.</string>
 </dict>
 </plist>
