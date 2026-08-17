@@ -12,7 +12,12 @@ class GeminiService {
       return null;
     }
     _model ??= GenerativeModel(
-      model: 'gemini-flash-latest',
+      // gemini-flash-latest currently aliases to a newer preview model that
+      // was returning frequent 503 "high demand" errors. gemini-flash-lite
+      // is the stable, lightweight variant - it spends far less of its
+      // budget on internal "thinking" (fitting for short kid-friendly
+      // answers) and is far less prone to overload.
+      model: 'gemini-flash-lite-latest',
       apiKey: geminiApiKey,
       systemInstruction: Content.system(
         'You are Safety Buddy, a friendly chatbot inside a child-safety '
@@ -24,32 +29,41 @@ class GeminiService {
         'conversation back to safety topics instead of answering it. '
         'Never share personal contact info, addresses, or unsafe advice.',
       ),
-      // gemini-flash-latest is a "thinking" model that spends part of the
-      // token budget on internal reasoning before the visible answer, so
-      // this needs real headroom or replies get cut off mid-sentence.
-      generationConfig: GenerationConfig(maxOutputTokens: 1024),
+      generationConfig: GenerationConfig(maxOutputTokens: 512),
     );
     return _model;
   }
 
-  /// Returns Gemini's reply, or null if the call failed (caller should
-  /// fall back to the offline lesson-based answer).
+  /// Returns Gemini's reply, or null if the call failed after retries
+  /// (caller should fall back to the offline lesson-based answer).
   Future<String?> ask(String prompt, {required bool bengali}) async {
     final model = _getModel(bengali);
     if (model == null) return null;
-    try {
-      final languageNote = bengali
-          ? 'Respond in Bengali (বাংলা).'
-          : 'Respond in English.';
-      final response = await model
-          .generateContent([
-            Content.text('$languageNote\n\nChild asks: $prompt'),
-          ])
-          .timeout(const Duration(seconds: 25));
-      final text = response.text?.trim();
-      return (text == null || text.isEmpty) ? null : text;
-    } catch (_) {
-      return null;
+    final languageNote = bengali
+        ? 'Respond in Bengali (বাংলা).'
+        : 'Respond in English.';
+
+    // Gemini's "high demand" 503s and stray connection resets are usually
+    // transient, so a couple of quick retries recover most of them instead
+    // of silently dropping to the offline canned reply.
+    const maxAttempts = 3;
+    for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        final response = await model
+            .generateContent([
+              Content.text('$languageNote\n\nChild asks: $prompt'),
+            ])
+            .timeout(const Duration(seconds: 20));
+        final text = response.text?.trim();
+        return (text == null || text.isEmpty) ? null : text;
+      } catch (e) {
+        final retryable =
+            e is GenerativeAIException && e.message.contains('503') ||
+            e.toString().contains('Software caused connection abort');
+        if (!retryable || attempt == maxAttempts) return null;
+        await Future.delayed(Duration(milliseconds: 500 * attempt));
+      }
     }
+    return null;
   }
 }

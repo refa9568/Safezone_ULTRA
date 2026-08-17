@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -55,7 +56,84 @@ List<List<int>> _generateMaze(int mazeRows, int mazeCols, Random rng) {
     grid[nr * 2 + 1][nc * 2 + 1] = 1;
     stack.add([nr, nc]);
   }
+
+  // A spanning tree has exactly one path between any two rooms. Knock down
+  // a fixed share of the remaining walls between neighboring rooms so
+  // multiple routes to the goal exist every time - the child then has to
+  // pick the shortest one, instead of leaving it to per-wall chance (which
+  // could roll zero extra openings for a given maze).
+  final closedWalls = <List<int>>[];
+  for (int r = 0; r < mazeRows; r++) {
+    for (int c = 0; c < mazeCols; c++) {
+      if (c + 1 < mazeCols) {
+        final wr = r * 2 + 1, wc = c * 2 + 2;
+        if (grid[wr][wc] == 0) closedWalls.add([wr, wc]);
+      }
+      if (r + 1 < mazeRows) {
+        final wr = r * 2 + 2, wc = c * 2 + 1;
+        if (grid[wr][wc] == 0) closedWalls.add([wr, wc]);
+      }
+    }
+  }
+  closedWalls.shuffle(rng);
+  final extraOpenings = min(
+    closedWalls.length,
+    max(4, (closedWalls.length * 0.3).round()),
+  );
+  for (int i = 0; i < extraOpenings; i++) {
+    final w = closedWalls[i];
+    grid[w[0]][w[1]] = 1;
+  }
   return grid;
+}
+
+/// Finds the shortest walkable route between [start] and [goal] on the
+/// carved [grid] using breadth-first search, returning the cells along it
+/// (inclusive of both ends), or an empty list if unreachable.
+List<List<int>> _shortestPath(
+  List<List<int>> grid,
+  int gridRows,
+  int gridCols,
+  List<int> start,
+  List<int> goal,
+) {
+  final visited = List.generate(gridRows, (_) => List.filled(gridCols, false));
+  final prevIndex = List.generate(gridRows, (_) => List.filled(gridCols, -1));
+  const dirs = [
+    [-1, 0],
+    [1, 0],
+    [0, -1],
+    [0, 1],
+  ];
+
+  final queue = Queue<List<int>>()..add(start);
+  visited[start[0]][start[1]] = true;
+
+  while (queue.isNotEmpty) {
+    final cur = queue.removeFirst();
+    if (cur[0] == goal[0] && cur[1] == goal[1]) break;
+    for (final d in dirs) {
+      final nr = cur[0] + d[0];
+      final nc = cur[1] + d[1];
+      if (nr < 0 || nr >= gridRows || nc < 0 || nc >= gridCols) continue;
+      if (grid[nr][nc] == 0 || visited[nr][nc]) continue;
+      visited[nr][nc] = true;
+      prevIndex[nr][nc] = cur[0] * gridCols + cur[1];
+      queue.add([nr, nc]);
+    }
+  }
+
+  if (!visited[goal[0]][goal[1]]) return const [];
+  final path = <List<int>>[];
+  var cr = goal[0], cc = goal[1];
+  path.add([cr, cc]);
+  while (cr != start[0] || cc != start[1]) {
+    final idx = prevIndex[cr][cc];
+    cr = idx ~/ gridCols;
+    cc = idx % gridCols;
+    path.add([cr, cc]);
+  }
+  return path.reversed.toList();
 }
 
 class MazeGameScreen extends StatefulWidget {
@@ -80,6 +158,9 @@ class _MazeGameScreenState extends State<MazeGameScreen> {
   final Set<String> _visited = {};
   int _moves = 0;
   bool _wonHandled = false;
+  Set<String> _shortestPathCells = {};
+  int _optimalMoves = 0;
+  bool _showShortestPath = false;
 
   @override
   void initState() {
@@ -101,6 +182,16 @@ class _MazeGameScreenState extends State<MazeGameScreen> {
         ..add('$_playerR,$_playerC');
       _moves = 0;
       _wonHandled = false;
+      _showShortestPath = false;
+      final path = _shortestPath(
+        _grid,
+        _gridRows,
+        _gridCols,
+        [_playerR, _playerC],
+        [_goalR, _goalC],
+      );
+      _shortestPathCells = path.map((p) => '${p[0]},${p[1]}').toSet();
+      _optimalMoves = path.isEmpty ? 0 : path.length - 1;
     });
   }
 
@@ -124,6 +215,7 @@ class _MazeGameScreenState extends State<MazeGameScreen> {
   void _onWin() {
     if (_wonHandled) return;
     _wonHandled = true;
+    setState(() => _showShortestPath = true);
     final appState = context.read<AppState>();
     final child = appState.activeChild!;
     final newBadge = appState.completeMazeGame(child);
@@ -153,6 +245,14 @@ class _MazeGameScreenState extends State<MazeGameScreen> {
             Text(
               t ? '$_moves টি পদক্ষেপ লেগেছে' : '$_moves steps',
               style: const TextStyle(color: Colors.grey),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              t
+                  ? 'সবচেয়ে সংক্ষিপ্ত পথ ছিল $_optimalMoves টি পদক্ষেপ (সোনালি রঙে দেখানো হয়েছে)'
+                  : 'Shortest path was $_optimalMoves steps (shown in gold)',
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.grey, fontSize: 12),
             ),
             const SizedBox(height: 12),
             Row(
@@ -227,12 +327,29 @@ class _MazeGameScreenState extends State<MazeGameScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.all(12),
-            child: Text(
-              t ? 'পদক্ষেপ: $_moves' : 'Steps: $_moves',
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
+            child: Column(
+              children: [
+                Text(
+                  t ? 'পদক্ষেপ: $_moves' : 'Steps: $_moves',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+                if (_showShortestPath) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    t
+                        ? 'সোনালি পথটি সবচেয়ে সংক্ষিপ্ত ছিল'
+                        : 'The gold path was the shortest way',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFFB8860B),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
           Expanded(
@@ -259,7 +376,14 @@ class _MazeGameScreenState extends State<MazeGameScreen> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(20),
+            // Lift the D-pad clear of the phone's on-screen navigation bar/
+            // gesture area, which otherwise overlaps taps near the bottom edge.
+            padding: EdgeInsets.fromLTRB(
+              20,
+              20,
+              20,
+              20 + MediaQuery.of(context).padding.bottom,
+            ),
             child: _DPad(onMove: _move),
           ),
         ],
@@ -272,10 +396,14 @@ class _MazeGameScreenState extends State<MazeGameScreen> {
     final isPlayer = r == _playerR && c == _playerC;
     final isGoal = r == _goalR && c == _goalC;
     final isVisited = _visited.contains('$r,$c');
+    final isOnShortestPath =
+        _showShortestPath && _shortestPathCells.contains('$r,$c');
 
     Color color;
     if (isWall) {
       color = const Color(0xFF1B4E86);
+    } else if (isOnShortestPath) {
+      color = const Color(0xFFFFD54F);
     } else if (isVisited) {
       color = const Color(0xFFBFE0FF);
     } else {

@@ -307,13 +307,21 @@ class _QuizScreenState extends State<QuizScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                _CarSlider(
-                  key: _carSliderKey,
-                  canNext: _answered[qIdx],
-                  canPrev: _queuePos > 0,
-                  carEmoji: carEmojis[_queuePos % carEmojis.length],
-                  onNext: _goNext,
-                  onPrev: _goPrev,
+                Padding(
+                  // Lift the Previous/Next slider clear of the phone's
+                  // on-screen navigation bar/gesture area, which otherwise
+                  // overlaps taps near the bottom edge.
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).padding.bottom,
+                  ),
+                  child: _CarSlider(
+                    key: _carSliderKey,
+                    canNext: _answered[qIdx],
+                    canPrev: _queuePos > 0,
+                    carEmoji: carEmojis[_queuePos % carEmojis.length],
+                    onNext: _goNext,
+                    onPrev: _goPrev,
+                  ),
                 ),
               ],
             ),

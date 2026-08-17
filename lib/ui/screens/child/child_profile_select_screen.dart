@@ -91,7 +91,15 @@ class ChildProfileSelectScreen extends StatelessWidget {
               children: [
                 const Positioned.fill(child: FloatingBubbles(count: 12)),
                 Padding(
-                  padding: const EdgeInsets.all(20),
+                  // Lift the Parent Dashboard button clear of the phone's
+                  // on-screen navigation bar/gesture area, which otherwise
+                  // overlaps taps near the bottom edge.
+                  padding: EdgeInsets.fromLTRB(
+                    20,
+                    20,
+                    20,
+                    20 + MediaQuery.of(context).padding.bottom,
+                  ),
                   child: Column(
                     children: [
                       Expanded(

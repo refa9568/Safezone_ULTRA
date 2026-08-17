@@ -257,11 +257,16 @@ class ParentShell extends StatelessWidget {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddChildDialog(context, state, t),
-        icon: const Icon(Icons.person_add_alt_1),
-        label: Text(t ? 'সন্তান যোগ করুন' : 'Add Child'),
-        backgroundColor: AppTheme.secondary,
+      floatingActionButton: Padding(
+        // Lift the button clear of the phone's on-screen navigation bar/
+        // gesture area, which otherwise overlaps taps near the bottom edge.
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+        child: FloatingActionButton.extended(
+          onPressed: () => _showAddChildDialog(context, state, t),
+          icon: const Icon(Icons.person_add_alt_1),
+          label: Text(t ? 'সন্তান যোগ করুন' : 'Add Child'),
+          backgroundColor: AppTheme.secondary,
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),

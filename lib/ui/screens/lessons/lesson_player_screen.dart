@@ -235,7 +235,15 @@ class _LessonPlayerScreenState extends State<LessonPlayerScreen> {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.all(20),
+                      // Lift the Previous/Next buttons clear of the phone's
+                      // on-screen navigation bar/gesture area, which
+                      // otherwise overlaps taps near the bottom edge.
+                      padding: EdgeInsets.fromLTRB(
+                        20,
+                        20,
+                        20,
+                        20 + MediaQuery.of(context).padding.bottom,
+                      ),
                       child: Row(
                         children: [
                           Expanded(
@@ -316,7 +324,15 @@ class _LessonPlayerScreenState extends State<LessonPlayerScreen> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(20),
+                  // Lift the Take-the-Quiz button clear of the phone's
+                  // on-screen navigation bar/gesture area, which otherwise
+                  // overlaps taps near the bottom edge.
+                  padding: EdgeInsets.fromLTRB(
+                    20,
+                    20,
+                    20,
+                    20 + MediaQuery.of(context).padding.bottom,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
