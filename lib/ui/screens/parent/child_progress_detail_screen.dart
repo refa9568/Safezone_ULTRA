@@ -20,6 +20,24 @@ class ChildProgressDetailScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.chat_bubble_outline_rounded),
+              title: Text(t ? 'চ্যাট হিস্ট্রি দেখুন' : 'View Chat History'),
+              subtitle: Text(
+                t
+                    ? 'সেফটি বাডির সাথে সব বার্তা দেখুন'
+                    : 'See all messages with Safety Buddy',
+              ),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => Navigator.pushNamed(
+                context,
+                '/chat-transcript',
+                arguments: child,
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
           Text(
             t ? 'সম্পন্ন মডিউল' : 'Completed Modules',
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),

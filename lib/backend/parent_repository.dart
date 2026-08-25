@@ -12,6 +12,7 @@ class ParentRepository extends FirestoreRepository<Parent> {
     email: data['email'] as String,
     emergencyPhone: data['emergencyPhone'] as String? ?? '',
     parentPin: data['parentPin'] as String? ?? '1234',
+    parentPinSet: data['parentPinSet'] as bool? ?? false,
   );
 
   @override
@@ -20,5 +21,6 @@ class ParentRepository extends FirestoreRepository<Parent> {
     'email': item.email,
     'emergencyPhone': item.emergencyPhone,
     'parentPin': item.parentPin,
+    'parentPinSet': item.parentPinSet,
   };
 }

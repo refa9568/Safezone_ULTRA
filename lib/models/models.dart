@@ -21,6 +21,7 @@ class Parent {
   final String email;
   String emergencyPhone;
   String parentPin;
+  bool parentPinSet;
 
   Parent({
     required this.id,
@@ -28,6 +29,7 @@ class Parent {
     required this.email,
     this.emergencyPhone = '',
     this.parentPin = '1234',
+    this.parentPinSet = false,
   });
 }
 

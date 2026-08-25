@@ -20,6 +20,8 @@ import 'package:safezone_ultra/ui/screens/quiz/quiz_screen.dart';
 import 'package:safezone_ultra/ui/screens/quiz/quiz_result_screen.dart';
 import 'package:safezone_ultra/ui/screens/parent/parent_shell.dart';
 import 'package:safezone_ultra/ui/screens/parent/child_progress_detail_screen.dart';
+import 'package:safezone_ultra/ui/screens/parent/chat_history_screen.dart';
+import 'package:safezone_ultra/ui/screens/parent/chat_transcript_screen.dart';
 import 'package:safezone_ultra/ui/screens/parent/screen_time_settings_screen.dart';
 import 'package:safezone_ultra/ui/screens/parent/settings_screen.dart';
 import 'package:safezone_ultra/ui/screens/games/mind_game_screen.dart';
@@ -58,6 +60,8 @@ class SafeZoneUltraApp extends StatelessWidget {
           '/quiz-result': (_) => const QuizResultScreen(),
           '/parent': (_) => const ParentShell(),
           '/child-progress': (_) => const ChildProgressDetailScreen(),
+          '/chat-history': (_) => const ChatHistoryScreen(),
+          '/chat-transcript': (_) => const ChatTranscriptScreen(),
           '/screen-time': (_) => const ScreenTimeSettingsScreen(),
           '/settings': (_) => const SettingsScreen(),
           '/mind-game': (_) => const MindGameScreen(),

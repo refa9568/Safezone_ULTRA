@@ -233,6 +233,11 @@ class ParentShell extends StatelessWidget {
                 onTap: () => Navigator.pushNamed(context, '/screen-time'),
               ),
               ListTile(
+                leading: const Icon(Icons.chat_bubble_outline_rounded),
+                title: Text(t ? 'চ্যাট হিস্ট্রি' : 'Chat History'),
+                onTap: () => Navigator.pushNamed(context, '/chat-history'),
+              ),
+              ListTile(
                 leading: const Icon(Icons.settings_outlined),
                 title: Text(t ? 'সেটিংস' : 'Settings'),
                 onTap: () => Navigator.pushNamed(context, '/settings'),

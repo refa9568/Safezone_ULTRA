@@ -56,29 +56,54 @@ class _SettingsScreenState extends State<SettingsScreen> {
     AppState state,
     bool t,
   ) async {
-    final controller = TextEditingController(text: state.parent.parentPin);
+    final controller = TextEditingController();
+    String? errorText;
     final result = await showDialog<String>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(t ? 'অভিভাবক পিন পরিবর্তন করুন' : 'Change Parent PIN'),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          maxLength: 6,
-          decoration: InputDecoration(labelText: t ? 'নতুন পিন' : 'New PIN'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(t ? 'বাতিল' : 'Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () =>
-                Navigator.pop(dialogContext, controller.text.trim()),
-            child: Text(t ? 'সংরক্ষণ করুন' : 'Save'),
-          ),
-        ],
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) {
+          void trySave() {
+            final pin = controller.text.trim();
+            if (pin.length != 4 || int.tryParse(pin) == null) {
+              setDialogState(
+                () => errorText = t
+                    ? '৪ সংখ্যার পিন দিন'
+                    : 'PIN must be exactly 4 digits',
+              );
+              return;
+            }
+            Navigator.pop(dialogContext, pin);
+          }
+
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: Text(t ? 'অভিভাবক পিন পরিবর্তন করুন' : 'Change Parent PIN'),
+            content: TextField(
+              controller: controller,
+              autofocus: true,
+              obscureText: true,
+              keyboardType: TextInputType.number,
+              maxLength: 4,
+              decoration: InputDecoration(
+                labelText: t ? 'নতুন পিন' : 'New PIN',
+                errorText: errorText,
+              ),
+              onSubmitted: (_) => trySave(),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: Text(t ? 'বাতিল' : 'Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: trySave,
+                child: Text(t ? 'সংরক্ষণ করুন' : 'Save'),
+              ),
+            ],
+          );
+        },
       ),
     );
     if (result != null && result.isNotEmpty) {

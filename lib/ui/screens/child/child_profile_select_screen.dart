@@ -20,10 +20,25 @@ class ChildProfileSelectScreen extends StatelessWidget {
     AppState state,
     bool t,
   ) async {
+    final unlocked = state.parent.parentPinSet
+        ? await _showEnterPinDialog(context, state, t)
+        : await _showCreatePinDialog(context, state, t);
+
+    if (unlocked == true && context.mounted) {
+      state.enterParentMode();
+      Navigator.pushReplacementNamed(context, '/parent');
+    }
+  }
+
+  Future<bool?> _showEnterPinDialog(
+    BuildContext context,
+    AppState state,
+    bool t,
+  ) async {
     final controller = TextEditingController();
     String? errorText;
 
-    final unlocked = await showDialog<bool>(
+    return showDialog<bool>(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (dialogContext, setDialogState) => AlertDialog(
@@ -36,7 +51,7 @@ class ChildProfileSelectScreen extends StatelessWidget {
             autofocus: true,
             obscureText: true,
             keyboardType: TextInputType.number,
-            maxLength: 6,
+            maxLength: 4,
             decoration: InputDecoration(
               labelText: t ? 'পিন' : 'PIN',
               errorText: errorText,
@@ -72,11 +87,96 @@ class ChildProfileSelectScreen extends StatelessWidget {
         ),
       ),
     );
+  }
 
-    if (unlocked == true && context.mounted) {
-      state.enterParentMode();
-      Navigator.pushReplacementNamed(context, '/parent');
+  Future<bool?> _showCreatePinDialog(
+    BuildContext context,
+    AppState state,
+    bool t,
+  ) async {
+    final pinController = TextEditingController();
+    final confirmController = TextEditingController();
+    String? errorText;
+
+    void trySave(BuildContext dialogContext, StateSetter setDialogState) {
+      final pin = pinController.text.trim();
+      final confirm = confirmController.text.trim();
+      if (pin.length != 4 || int.tryParse(pin) == null) {
+        setDialogState(
+          () => errorText = t
+              ? '৪ সংখ্যার পিন দিন'
+              : 'PIN must be exactly 4 digits',
+        );
+        return;
+      }
+      if (pin != confirm) {
+        setDialogState(
+          () => errorText = t ? 'পিন মিলছে না' : 'PINs do not match',
+        );
+        return;
+      }
+      state.setParentPin(pin);
+      Navigator.pop(dialogContext, true);
     }
+
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Text(
+            t ? 'ড্যাশবোর্ডের জন্য একটি পিন তৈরি করুন' : 'Create a Dashboard PIN',
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  t
+                      ? 'এটাই হবে অভিভাবক ড্যাশবোর্ডে প্রবেশের পিন। ৪ সংখ্যার একটি পিন দিন।'
+                      : 'This will be the PIN used to enter the Parent Dashboard. Choose a 4-digit PIN.',
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: pinController,
+                  autofocus: true,
+                  obscureText: true,
+                  keyboardType: TextInputType.number,
+                  maxLength: 4,
+                  decoration: InputDecoration(
+                    labelText: t ? 'নতুন পিন' : 'New PIN',
+                  ),
+                ),
+                TextField(
+                  controller: confirmController,
+                  obscureText: true,
+                  keyboardType: TextInputType.number,
+                  maxLength: 4,
+                  decoration: InputDecoration(
+                    labelText: t ? 'পিন নিশ্চিত করুন' : 'Confirm PIN',
+                    errorText: errorText,
+                  ),
+                  onSubmitted: (_) => trySave(dialogContext, setDialogState),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(t ? 'বাতিল' : 'Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => trySave(dialogContext, setDialogState),
+              child: Text(t ? 'সংরক্ষণ করুন' : 'Save'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override

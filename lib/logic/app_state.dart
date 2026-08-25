@@ -386,8 +386,11 @@ class AppState extends ChangeNotifier {
 
   void setParentPin(String pin) {
     parent.parentPin = pin;
+    parent.parentPinSet = true;
     notifyListeners();
-    _parentRepo.updateFields(parent.id, {'parentPin': pin}).catchError((_) {});
+    _parentRepo
+        .updateFields(parent.id, {'parentPin': pin, 'parentPinSet': true})
+        .catchError((_) {});
   }
 
   List<QuizResult> resultsForChild(String childId) =>
