@@ -46,6 +46,8 @@ dependencies:
   image_picker: ^1.1.2
   google_generative_ai: ^0.4.6
   connectivity_plus: ^6.1.0
+  http: ^1.2.2
+  audioplayers: ^6.1.0
 
 dev_dependencies:
   flutter_test:
@@ -85,6 +87,10 @@ flutter:
     - assets/lessons/fire/
     - assets/lessons/earthquake/
     - assets/lessons/stranger/
+    - assets/lessons/flood/audio/
+    - assets/lessons/fire/audio/
+    - assets/lessons/earthquake/audio/
+    - assets/lessons/stranger/audio/
   # - images/a_dot_burr.jpeg
   # - images/a_dot_ham.jpeg
 

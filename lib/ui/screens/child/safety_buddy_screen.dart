@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider/provider.dart';
 import 'package:speech_to_text/speech_to_text.dart';
+import 'package:safezone_ultra/backend/humanized_tts_service.dart';
 import 'package:safezone_ultra/logic/app_state.dart';
 import 'package:safezone_ultra/ui/widgets/floating_bubbles.dart';
 
@@ -15,7 +15,7 @@ class SafetyBuddyScreen extends StatefulWidget {
 class _SafetyBuddyScreenState extends State<SafetyBuddyScreen> {
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
-  final FlutterTts _tts = FlutterTts();
+  final HumanizedTts _tts = HumanizedTts();
   final SpeechToText _speech = SpeechToText();
 
   bool _speechEnabled = false;
@@ -26,17 +26,7 @@ class _SafetyBuddyScreenState extends State<SafetyBuddyScreen> {
   @override
   void initState() {
     super.initState();
-    _tts.setSpeechRate(0.42);
-    _tts.setPitch(1.05);
-    _tts.setCompletionHandler(() {
-      if (mounted) {
-        setState(() {
-          _isSpeaking = false;
-          _playingId = null;
-        });
-      }
-    });
-    _tts.setCancelHandler(() {
+    _tts.setOnComplete(() {
       if (mounted) {
         setState(() {
           _isSpeaking = false;
@@ -63,6 +53,7 @@ class _SafetyBuddyScreenState extends State<SafetyBuddyScreen> {
   @override
   void dispose() {
     _tts.stop();
+    _tts.dispose();
     _speech.stop();
     _controller.dispose();
     _scrollController.dispose();
@@ -113,12 +104,11 @@ class _SafetyBuddyScreenState extends State<SafetyBuddyScreen> {
       return;
     }
     await _tts.stop();
-    await _tts.setLanguage(bengali ? 'bn-BD' : 'en-US');
     setState(() {
       _isSpeaking = true;
       _playingId = id;
     });
-    await _tts.speak(text);
+    await _tts.speak(text, bengali: bengali);
   }
 
   void _send(AppState state) {

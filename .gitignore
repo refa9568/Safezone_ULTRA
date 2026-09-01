@@ -46,6 +46,7 @@ app.*.map.json
 
 # Secrets - never commit real API keys
 lib/backend/gemini_config.dart
+lib/backend/cloud_tts_config.dart
 
 # Cloud Functions
 functions/node_modules/

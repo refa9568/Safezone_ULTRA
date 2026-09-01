@@ -132,6 +132,18 @@ class LessonModule {
       stepVideos: strList('stepVideos'),
     );
   }
+
+  /// Path (relative to the assets/ root, ready for audioplayers'
+  /// AssetSource) of the pre-recorded narration for step [index], generated
+  /// once via tool/export_lesson_audio_manifest.dart — see that file to
+  /// regenerate after editing lesson text.
+  String stepAudioAsset(int index, {required bool bengali}) =>
+      'lessons/${category.name}/audio/step_${index + 1}_${bengali ? 'bn' : 'en'}.mp3';
+
+  /// Path (relative to the assets/ root) of the pre-recorded narration for
+  /// this module's summary.
+  String summaryAudioAsset({required bool bengali}) =>
+      'lessons/${category.name}/audio/summary_${bengali ? 'bn' : 'en'}.mp3';
 }
 
 class QuizQuestion {

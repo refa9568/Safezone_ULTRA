@@ -1,5 +1,5 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:safezone_ultra/services/mock_data.dart';
@@ -43,39 +43,36 @@ class LessonPlayerScreen extends StatefulWidget {
 
 class _LessonPlayerScreenState extends State<LessonPlayerScreen> {
   final PageController _pageController = PageController();
-  final FlutterTts _tts = FlutterTts();
+  final AudioPlayer _player = AudioPlayer();
   int _page = 0;
   bool _isSpeaking = false;
 
   @override
   void initState() {
     super.initState();
-    _tts.setSpeechRate(0.42);
-    _tts.setPitch(1.05);
-    _tts.setCompletionHandler(() {
-      if (mounted) setState(() => _isSpeaking = false);
-    });
-    _tts.setCancelHandler(() {
+    _player.onPlayerComplete.listen((_) {
       if (mounted) setState(() => _isSpeaking = false);
     });
   }
 
   @override
   void dispose() {
-    _tts.stop();
+    _player.stop();
+    _player.dispose();
     _pageController.dispose();
     super.dispose();
   }
 
-  Future<void> _speak(String text, bool bengali) async {
+  /// Plays the pre-recorded narration at [assetPath] (relative to assets/,
+  /// see LessonModule.stepAudioAsset / summaryAudioAsset).
+  Future<void> _speak(String assetPath) async {
     if (_isSpeaking) {
-      await _tts.stop();
+      await _player.stop();
       setState(() => _isSpeaking = false);
       return;
     }
-    await _tts.setLanguage(bengali ? 'bn-BD' : 'en-US');
     setState(() => _isSpeaking = true);
-    await _tts.speak(text);
+    await _player.play(AssetSource(assetPath));
   }
 
   @override
@@ -141,7 +138,7 @@ class _LessonPlayerScreenState extends State<LessonPlayerScreen> {
                         controller: _pageController,
                         itemCount: steps.length,
                         onPageChanged: (i) {
-                          _tts.stop();
+                          _player.stop();
                           setState(() {
                             _page = i;
                             _isSpeaking = false;
@@ -209,7 +206,9 @@ class _LessonPlayerScreenState extends State<LessonPlayerScreen> {
                                 ),
                                 const SizedBox(height: 14),
                                 ElevatedButton.icon(
-                                  onPressed: () => _speak(steps[i], t),
+                                  onPressed: () => _speak(
+                                    module.stepAudioAsset(i, bengali: t),
+                                  ),
                                   icon: Icon(
                                     _isSpeaking
                                         ? Icons.stop_circle_rounded
@@ -359,8 +358,7 @@ class _LessonPlayerScreenState extends State<LessonPlayerScreen> {
                               Center(
                                 child: ElevatedButton.icon(
                                   onPressed: () => _speak(
-                                    t ? module.summaryBn : module.summary,
-                                    t,
+                                    module.summaryAudioAsset(bengali: t),
                                   ),
                                   icon: Icon(
                                     _isSpeaking
