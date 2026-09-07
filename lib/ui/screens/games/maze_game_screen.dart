@@ -155,7 +155,7 @@ class _MazeGameScreenState extends State<MazeGameScreen> {
   late int _playerC;
   late int _goalR;
   late int _goalC;
-  final Set<String> _visited = {};
+  final List<String> _path = [];
   int _moves = 0;
   bool _wonHandled = false;
   Set<String> _shortestPathCells = {};
@@ -177,7 +177,7 @@ class _MazeGameScreenState extends State<MazeGameScreen> {
       _playerC = 1;
       _goalR = _gridRows - 2;
       _goalC = _gridCols - 2;
-      _visited
+      _path
         ..clear()
         ..add('$_playerR,$_playerC');
       _moves = 0;
@@ -204,7 +204,15 @@ class _MazeGameScreenState extends State<MazeGameScreen> {
     setState(() {
       _playerR = nr;
       _playerC = nc;
-      _visited.add('$nr,$nc');
+      // Stepping back onto the cell we just came from is a backtrack, not a
+      // new visit - pop it off the trail so it stops showing as visited.
+      final isBacktrack =
+          _path.length >= 2 && _path[_path.length - 2] == '$nr,$nc';
+      if (isBacktrack) {
+        _path.removeLast();
+      } else {
+        _path.add('$nr,$nc');
+      }
       _moves++;
     });
     if (_playerR == _goalR && _playerC == _goalC) _onWin();
@@ -395,15 +403,20 @@ class _MazeGameScreenState extends State<MazeGameScreen> {
     final isWall = _grid[r][c] == 0;
     final isPlayer = r == _playerR && c == _playerC;
     final isGoal = r == _goalR && c == _goalC;
-    final isVisited = _visited.contains('$r,$c');
+    final isVisited = _path.contains('$r,$c');
     final isOnShortestPath =
         _showShortestPath && _shortestPathCells.contains('$r,$c');
+    // Once the child has won, _path holds their actual final route (dead-end
+    // detours were popped off as they backtracked), so highlight it darker.
+    final isOnFinalRoute = _wonHandled && isVisited;
 
     Color color;
     if (isWall) {
       color = const Color(0xFF1B4E86);
     } else if (isOnShortestPath) {
       color = const Color(0xFFFFD54F);
+    } else if (isOnFinalRoute) {
+      color = const Color(0xFF4A90D2);
     } else if (isVisited) {
       color = const Color(0xFFBFE0FF);
     } else {
