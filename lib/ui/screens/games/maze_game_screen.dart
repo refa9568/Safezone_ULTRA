@@ -163,6 +163,12 @@ class _MazeGameScreenState extends State<MazeGameScreen> {
   bool _showShortestPath = false;
   bool _newBadge = false;
 
+  // Accumulates raw drag distance between swipe-triggered moves, so a single
+  // continuous finger drag across the board can step the player multiple
+  // cells - the same gesture feel as the D-pad buttons, just via touch.
+  Offset _dragAccumulator = Offset.zero;
+  static const double _swipeStep = 28;
+
   @override
   void initState() {
     super.initState();
@@ -184,6 +190,7 @@ class _MazeGameScreenState extends State<MazeGameScreen> {
       _moves = 0;
       _wonHandled = false;
       _showShortestPath = false;
+      _dragAccumulator = Offset.zero;
       final path = _shortestPath(
         _grid,
         _gridRows,
@@ -217,6 +224,25 @@ class _MazeGameScreenState extends State<MazeGameScreen> {
       _moves++;
     });
     if (_playerR == _goalR && _playerC == _goalC) _onWin();
+  }
+
+  void _onPanUpdate(DragUpdateDetails details) {
+    if (_wonHandled) return;
+    _dragAccumulator += details.delta;
+    // Consume the accumulator one step at a time so fast/long drags queue up
+    // several moves, same as repeatedly tapping a direction button.
+    while (_dragAccumulator.dx.abs() >= _swipeStep ||
+        _dragAccumulator.dy.abs() >= _swipeStep) {
+      if (_dragAccumulator.dx.abs() > _dragAccumulator.dy.abs()) {
+        final dc = _dragAccumulator.dx > 0 ? 1 : -1;
+        _dragAccumulator -= Offset(_swipeStep * dc, 0);
+        _move(0, dc);
+      } else {
+        final dr = _dragAccumulator.dy > 0 ? 1 : -1;
+        _dragAccumulator -= Offset(0, _swipeStep * dr);
+        _move(dr, 0);
+      }
+    }
   }
 
   int get _stars => _moves <= 26 ? 3 : (_moves <= 40 ? 2 : 1);
@@ -362,23 +388,28 @@ class _MazeGameScreenState extends State<MazeGameScreen> {
             ),
           ),
           Expanded(
-            child: Center(
-              child: AspectRatio(
-                aspectRatio: _gridCols / _gridRows,
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16),
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primary,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: GridView.count(
-                    crossAxisCount: _gridCols,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: [
-                      for (int r = 0; r < _gridRows; r++)
-                        for (int c = 0; c < _gridCols; c++) _buildCell(r, c),
-                    ],
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onPanUpdate: _onPanUpdate,
+              onPanEnd: (_) => _dragAccumulator = Offset.zero,
+              child: Center(
+                child: AspectRatio(
+                  aspectRatio: _gridCols / _gridRows,
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primary,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: GridView.count(
+                      crossAxisCount: _gridCols,
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: [
+                        for (int r = 0; r < _gridRows; r++)
+                          for (int c = 0; c < _gridCols; c++) _buildCell(r, c),
+                      ],
+                    ),
                   ),
                 ),
               ),

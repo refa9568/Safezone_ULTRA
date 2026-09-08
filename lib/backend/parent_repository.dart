@@ -11,7 +11,7 @@ class ParentRepository extends FirestoreRepository<Parent> {
     name: data['name'] as String,
     email: data['email'] as String,
     emergencyPhone: data['emergencyPhone'] as String? ?? '',
-    parentPin: data['parentPin'] as String? ?? '1234',
+    parentPin: data['parentPin'] as String? ?? '',
     parentPinSet: data['parentPinSet'] as bool? ?? false,
   );
 
