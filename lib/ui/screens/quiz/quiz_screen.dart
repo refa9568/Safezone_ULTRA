@@ -99,7 +99,7 @@ class _QuizScreenState extends State<QuizScreen> {
     if (!_initialized) {
       final quiz = ModalRoute.of(context)!.settings.arguments as Quiz;
       final n = quiz.questions.length;
-      _queue = List.generate(n, (i) => i);
+      _queue = List.generate(n, (i) => i)..shuffle(Random());
       _answered = List.filled(n, false);
       _isCorrect = List.filled(n, false);
       _attempt = List.filled(n, 1);
@@ -109,7 +109,87 @@ class _QuizScreenState extends State<QuizScreen> {
         (i) => _shuffledOrder(quiz.questions[i].options.length, null),
       );
       _initialized = true;
+
+      final appState = context.read<AppState>();
+      final childId = appState.activeChild?.id;
+      if (childId != null) {
+        final saved = appState.quizProgressFor(childId, quiz.id);
+        if (saved != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) _offerResume(childId, quiz, saved);
+          });
+        }
+      }
     }
+  }
+
+  /// Shown once, on entry, when this child left this exact quiz unfinished
+  /// last time - lets them pick up where they stopped instead of always
+  /// being forced back to question one.
+  void _offerResume(String childId, Quiz quiz, QuizProgress saved) {
+    final t = context.read<AppState>().bengali;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(t ? 'আগের কুইজ চালিয়ে যাবে?' : 'Resume your quiz?'),
+        content: Text(
+          t
+              ? 'তুমি আগে এই কুইজটা অসম্পূর্ণ রেখে বের হয়ে গিয়েছিলে। আগের জায়গা থেকে চালিয়ে যাবে, নাকি নতুন করে শুরু করবে?'
+              : "You left this quiz unfinished last time. Continue where you left off, or start over?",
+          textAlign: TextAlign.center,
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          OutlinedButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              context.read<AppState>().clearQuizProgress(childId, quiz.id);
+            },
+            child: Text(t ? 'নতুন শুরু' : 'Start New'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              setState(() {
+                _queue = List.of(saved.queue);
+                _queuePos = saved.queuePos;
+                _answered = List.of(saved.answered);
+                _isCorrect = List.of(saved.isCorrect);
+                _attempt = List.of(saved.attempt);
+                _wrongSelected = List.of(saved.wrongSelected);
+                _optionOrder = saved.optionOrder
+                    .map((o) => List<int>.of(o))
+                    .toList();
+              });
+            },
+            child: Text(t ? 'চালিয়ে যাও' : 'Continue'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Saves the current in-progress state so it can be offered back if the
+  /// child leaves before finishing this quiz.
+  void _persistProgress(Quiz quiz) {
+    final appState = context.read<AppState>();
+    final childId = appState.activeChild?.id;
+    if (childId == null) return;
+    appState.saveQuizProgress(
+      childId,
+      quiz.id,
+      QuizProgress(
+        queue: List.of(_queue),
+        queuePos: _queuePos,
+        answered: List.of(_answered),
+        isCorrect: List.of(_isCorrect),
+        attempt: List.of(_attempt),
+        wrongSelected: List.of(_wrongSelected),
+        optionOrder: _optionOrder.map((o) => List<int>.of(o)).toList(),
+      ),
+    );
   }
 
   List<int> _shuffledOrder(int length, List<int>? avoid) {
@@ -400,6 +480,7 @@ class _QuizScreenState extends State<QuizScreen> {
 
   void _selectAnswer(int qIdx, int origIdx, QuizQuestion question) {
     if (_answered[qIdx] || _wrongSelected[qIdx] != null) return;
+    final quiz = ModalRoute.of(context)!.settings.arguments as Quiz;
 
     if (origIdx == question.correctIndex) {
       setState(() {
@@ -409,6 +490,7 @@ class _QuizScreenState extends State<QuizScreen> {
         _celebrating = true;
         _celebrationKey++;
       });
+      _persistProgress(quiz);
       Future.delayed(const Duration(milliseconds: 1200), () {
         if (mounted) setState(() => _celebrating = false);
       });
@@ -427,6 +509,7 @@ class _QuizScreenState extends State<QuizScreen> {
         _showEncouragement = true;
       }
     });
+    _persistProgress(quiz);
   }
 
   void _tryAgain() {
@@ -439,6 +522,7 @@ class _QuizScreenState extends State<QuizScreen> {
       _wrongSelected[qIdx] = null;
       _showEncouragement = false;
     });
+    _persistProgress(quiz);
   }
 
   void _skip() {
@@ -455,6 +539,7 @@ class _QuizScreenState extends State<QuizScreen> {
       );
       _showEncouragement = false;
     });
+    _persistProgress(quiz);
   }
 
   void _goNext() {
@@ -466,6 +551,7 @@ class _QuizScreenState extends State<QuizScreen> {
       final child = state.activeChild!;
       final correctCount = _isCorrect.where((c) => c).length;
       state.submitQuizResult(child, quiz, correctCount);
+      state.clearQuizProgress(child.id, quiz.id);
       Navigator.pushReplacementNamed(
         context,
         '/quiz-result',
@@ -476,6 +562,7 @@ class _QuizScreenState extends State<QuizScreen> {
         _queuePos++;
         _showEncouragement = false;
       });
+      _persistProgress(quiz);
     }
   }
 
@@ -485,6 +572,8 @@ class _QuizScreenState extends State<QuizScreen> {
       _queuePos--;
       _showEncouragement = false;
     });
+    final quiz = ModalRoute.of(context)!.settings.arguments as Quiz;
+    _persistProgress(quiz);
   }
 }
 
@@ -520,7 +609,7 @@ class _CarSliderState extends State<_CarSlider>
     super.initState();
     _autoController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 550),
+      duration: const Duration(milliseconds: 1000),
     )..addListener(() {
       setState(() => _drag = _autoController.value * _lastMaxOffset);
     });

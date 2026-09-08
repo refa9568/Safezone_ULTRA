@@ -10,6 +10,29 @@ import 'package:safezone_ultra/backend/chat_message_repository.dart';
 import 'package:safezone_ultra/backend/notification_repository.dart';
 import 'package:safezone_ultra/backend/gemini_service.dart';
 
+/// A snapshot of an in-progress [Quiz] attempt, saved when a child leaves
+/// the quiz screen before finishing so it can be offered back to them next
+/// time they open that same quiz.
+class QuizProgress {
+  final List<int> queue;
+  final int queuePos;
+  final List<bool> answered;
+  final List<bool> isCorrect;
+  final List<int> attempt;
+  final List<int?> wrongSelected;
+  final List<List<int>> optionOrder;
+
+  QuizProgress({
+    required this.queue,
+    required this.queuePos,
+    required this.answered,
+    required this.isCorrect,
+    required this.attempt,
+    required this.wrongSelected,
+    required this.optionOrder,
+  });
+}
+
 class AppState extends ChangeNotifier {
   bool bengali = false;
 
@@ -38,6 +61,25 @@ class AppState extends ChangeNotifier {
   List<EarnedBadge> badges = [];
   List<ChatMessage> chatMessages = [];
   List<AppNotification> notifications = [];
+
+  /// In-progress quiz attempts, kept only for the life of the app process
+  /// (not persisted to Firestore) so a child can resume a quiz they left
+  /// mid-way instead of always starting over. Keyed by "childId|quizId".
+  final Map<String, QuizProgress> _quizProgress = {};
+
+  String _quizProgressKey(String childId, String quizId) =>
+      '$childId|$quizId';
+
+  QuizProgress? quizProgressFor(String childId, String quizId) =>
+      _quizProgress[_quizProgressKey(childId, quizId)];
+
+  void saveQuizProgress(String childId, String quizId, QuizProgress progress) {
+    _quizProgress[_quizProgressKey(childId, quizId)] = progress;
+  }
+
+  void clearQuizProgress(String childId, String quizId) {
+    _quizProgress.remove(_quizProgressKey(childId, quizId));
+  }
 
   /// Loads the signed-in parent's data from Firestore, keyed by their
   /// Firebase Auth [uid]. Creates the Parent document on first sign-in
