@@ -28,7 +28,7 @@ class Parent {
     required this.name,
     required this.email,
     this.emergencyPhone = '',
-    this.parentPin = '1234',
+    this.parentPin = '',
     this.parentPinSet = false,
   });
 }
