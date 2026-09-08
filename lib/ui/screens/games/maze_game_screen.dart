@@ -161,6 +161,7 @@ class _MazeGameScreenState extends State<MazeGameScreen> {
   Set<String> _shortestPathCells = {};
   int _optimalMoves = 0;
   bool _showShortestPath = false;
+  bool _newBadge = false;
 
   @override
   void initState() {
@@ -222,13 +223,13 @@ class _MazeGameScreenState extends State<MazeGameScreen> {
 
   void _onWin() {
     if (_wonHandled) return;
-    _wonHandled = true;
-    setState(() => _showShortestPath = true);
     final appState = context.read<AppState>();
     final child = appState.activeChild!;
     final newBadge = appState.completeMazeGame(child);
-    Future.delayed(const Duration(milliseconds: 300), () {
-      if (mounted) _showWinDialog(newBadge);
+    setState(() {
+      _wonHandled = true;
+      _showShortestPath = true;
+      _newBadge = newBadge;
     });
   }
 
@@ -384,15 +385,31 @@ class _MazeGameScreenState extends State<MazeGameScreen> {
             ),
           ),
           Padding(
-            // Lift the D-pad clear of the phone's on-screen navigation bar/
-            // gesture area, which otherwise overlaps taps near the bottom edge.
+            // Lift the controls clear of the phone's on-screen navigation
+            // bar/gesture area, which otherwise overlaps taps near the
+            // bottom edge.
             padding: EdgeInsets.fromLTRB(
               20,
               20,
               20,
               20 + MediaQuery.of(context).padding.bottom,
             ),
-            child: _DPad(onMove: _move),
+            // Keep the shortest path visible on screen instead of rushing
+            // straight to the win dialog - the child only moves on once they
+            // press End.
+            child: _wonHandled
+                ? ElevatedButton.icon(
+                    onPressed: () => _showWinDialog(_newBadge),
+                    icon: const Icon(Icons.flag_rounded),
+                    label: Text(t ? 'শেষ করো' : 'End'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 16,
+                      ),
+                    ),
+                  )
+                : _DPad(onMove: _move),
           ),
         ],
       ),
